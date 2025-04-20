@@ -1,0 +1,5 @@
+
+project_id = "wpdvbcymfrsslxhsgxnv"
+
+[functions.mark-absent-users]
+verify_jwt = false
