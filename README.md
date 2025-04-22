@@ -88,7 +88,7 @@ farhanshahriyar-kingsrock-webportal/
 ## 🚀 Installation
 
 ```bash
-git clone https://github.com/your-username/farhanshahriyar-kingsrock-webportal.git
+git clone https://github.com/farhanshahriyar/farhanshahriyar-kingsrock-webportal.git
 cd farhanshahriyar-kingsrock-webportal
 npm install
 ```
