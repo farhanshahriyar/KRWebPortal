@@ -171,6 +171,16 @@ farhanshahriyar-kingsrock-webportal/
             └── index.ts
 ```
 
+## ⚙️ Features
+Module | Description
+🧑‍💼 Member Management | View, edit, and manage user roles and details.
+🏖 Leave Requests | Submit and approve requests with status filters.
+🏆 Tournaments | Schedule, edit, and list tournament events.
+📈 Attendance | Monitor member attendance with data visualizations.
+🔔 Notifications | Push real-time updates and logs to users.
+👮 Role-Based Access | Secure features behind permission controls.
+☁ Supabase Integration | Auth, storage, database, and edge functions powered by Supabase.
+
 ## Installation
 
 To get started with this project locally:
@@ -202,6 +212,15 @@ npm run dev
 ```
 
 This will start a local development server and you can view the app by opening `http://localhost:****` in your browser.
+
+
+## 🧪 Technologies Used
+Stack | Tools/Libraries
+Frontend | React, TypeScript, TailwindCSS
+UI Components | ShadCN/UI, Recharts, HeroIcons
+State Mgmt | Context API, Custom Hooks
+Backend/Auth | Supabase 
+Deployment | Netlify 
 
 ## License
 
