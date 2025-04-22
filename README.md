@@ -128,7 +128,7 @@ npm run preview
 
 
 > *“Building the future of eSports management—one feature at a time.”*  
-> — Abir | Founder of KingsRock eSports
+> — RoboCop | Founder of KingsRock eSports
 ```
 
 
