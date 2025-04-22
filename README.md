@@ -14,9 +14,6 @@ Built using modern front-end technologies like **React**, **TypeScript**, **Tail
 - [🚀 Installation](#-installation)
 - [📦 Usage](#-usage)
 - [🧪 Technologies Used](#-technologies-used)
-- [🛡️ License](#-license)
-- [🙌 Contributing](#-contributing)
-- [📞 Contact](#-contact)
 
 ---
 
@@ -80,7 +77,7 @@ farhanshahriyar-kingsrock-webportal/
 |-----------------------|-----------------------------------------------------------------------------|
 | 🧑‍💼 Member Management  | View, edit, and manage user roles and details.                              |
 | 🏖 Leave Requests      | Submit and approve requests with status filters.                            |
-| 🏆 Tournaments         | Schedule, edit, and list tournament events.                                 |
+| 🏆 Tournaments         | Schedule, edit, and list tournament events. [running]                                |
 | 📈 Attendance          | Monitor member attendance with data visualizations.                         |
 | 🔔 Notifications       | Push real-time updates and logs to users.                                   |
 | 👮 Role-Based Access   | Secure features behind permission controls.                                 |
@@ -124,24 +121,14 @@ npm run preview
 | Stack           | Tools/Libraries                       |
 |----------------|----------------------------------------|
 | Frontend       | React, TypeScript, TailwindCSS         |
-| Build Tool     | Vite                                   |
 | UI Components  | ShadCN/UI, Recharts, HeroIcons         |
 | State Mgmt     | Context API, Custom Hooks              |
-| Backend/Auth   | Supabase (PostgreSQL, Edge Functions)  |
-| Deployment     | Netlify / Vercel / Render              |
+| Backend/Auth   | Supabase                               |
+| Deployment     | Netlify                                |
 
----
-
-## 🛡️ License
-
-This project is licensed under the **MIT License**. See the [LICENSE](LICENSE) file for full details.
-
----
-
----
 
 > *“Building the future of eSports management—one feature at a time.”*  
 > — Abir | Founder of KingsRock eSports
 ```
 
----
+
