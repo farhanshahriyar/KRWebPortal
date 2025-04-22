@@ -14,9 +14,9 @@ This project is a web application for managing various aspects of the Kingsrock 
 
 The Kingsrock Webportal provides an interactive dashboard and various management features for administrators and users. Key features include:
 
-- **Admin Dashboard**: View member lists, edit member details, and manage role-based features. [running]
+- **Admin Dashboard**: View member lists, edit member details, and manage role-based features.
 - **Leave Requests**: Submit, view, and manage leave requests.
-- **Tournament Scheduling**: Create and manage tournaments.
+- **Tournament Scheduling**: Create and manage tournaments.[running]
 - **Attendance Tracking**: View and track attendance for different members.
 - **Notifications & Updates**: View announcements and updates in real-time.
   
