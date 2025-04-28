@@ -11,6 +11,7 @@ Built using modern front-end technologies like **React**, **TypeScript**, **Tail
 - [✨ Overview](#-overview)
 - [📁 Directory Structure](#-directory-structure)
 - [⚙️ Features](#️-features)
+- [ Flowchart](-flowchart)
 - [🚀 Installation](#-installation)
 - [📦 Usage](#-usage)
 - [🧪 Technologies Used](#-technologies-used)
@@ -84,6 +85,9 @@ farhanshahriyar-kingsrock-webportal/
 | ☁ Supabase Integration| Auth, storage, database, and edge functions powered by Supabase.            |
 
 ---
+
+## Flowchart
+![KRWebPortalFlowwchart](https://78d11y9vqc.ufs.sh/f/5z2fDmMWhbJSNApGFyCHpgBdutyeKjfkqzYFVnG1hXCRmWMc)
 
 ## 🚀 Installation
 
