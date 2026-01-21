@@ -11,6 +11,8 @@ import { RoleProvider, useRole } from "@/contexts/RoleContext";
 import { toast } from "sonner";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
+import ResetPassword from "./pages/ResetPassword";
+import Forbidden from "./pages/Forbidden";
 import Attendance from "./pages/Attendance";
 import NOC from "./pages/NOC";
 import Members from "./pages/Members";
@@ -28,24 +30,16 @@ import { ManageUserReports } from "@/admin-dashboard/ManageUserReports";
 import AttendenceList from "./admin-dashboard/AttendenceList/AttendenceList";
 import { ForgetPassword } from "./admin-dashboard/ForgetPassword";
 
-// ProtectedRoute Component
+// ProtectedRoute Component - Only handles authentication
 function ProtectedRoute({ children }: { children: ReactNode }) {
-  const { setRole } = useRole();
   const [session, setSession] = useState<unknown>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Fetch session and set role on page load
+    // Fetch session on page load
     const initializeSession = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       setSession(session);
-
-      if (session?.user?.user_metadata?.role) {
-        setRole(session.user.user_metadata.role);
-      } else {
-        setRole("kr_member"); // Default to kr_member if no role exists
-      }
-
       setLoading(false);
     };
 
@@ -54,16 +48,11 @@ function ProtectedRoute({ children }: { children: ReactNode }) {
     // Subscribe to session changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
-      if (session?.user?.user_metadata?.role) {
-        setRole(session.user.user_metadata.role);
-      } else {
-        setRole("kr_member");
-      }
       setLoading(false);
     });
 
-    return () => subscription.unsubscribe(); // Cleanup the subscription
-  }, [setRole]);
+    return () => subscription.unsubscribe();
+  }, []);
 
   if (loading) {
     return <LoadingIndicator />;
@@ -97,6 +86,8 @@ const App = () => {
               <Sonner />
               <Routes>
                 <Route path="/auth" element={<Auth />} />
+                <Route path="/reset-password" element={<ResetPassword />} />
+                <Route path="/forbidden" element={<Forbidden />} />
                 <Route
                   path="/*"
                   element={
@@ -121,9 +112,9 @@ const App = () => {
                                   path="/manage-attendence"
                                   element={
                                     <ProtectedComponent feature="manage_attendence">
-                                      <AttendenceList/>
+                                      <AttendenceList />
                                     </ProtectedComponent>
-                                  } 
+                                  }
                                 />
                                 <Route
                                   path="/manage-members"
@@ -131,7 +122,7 @@ const App = () => {
                                     <ProtectedComponent feature="manage_members">
                                       <ManageMembers />
                                     </ProtectedComponent>
-                                  } 
+                                  }
                                 />
                                 <Route
                                   path="/manage-passwords"
@@ -139,7 +130,7 @@ const App = () => {
                                     <ProtectedComponent feature="manage_passwords">
                                       <ForgetPassword />
                                     </ProtectedComponent>
-                                  } 
+                                  }
                                 />
                                 <Route
                                   path="/manage-user-reports"
@@ -147,7 +138,7 @@ const App = () => {
                                     <ProtectedComponent feature="manage_user-reports">
                                       <ManageUserReports />
                                     </ProtectedComponent>
-                                  } 
+                                  }
                                 />
 
                               </Routes>

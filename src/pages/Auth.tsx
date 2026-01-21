@@ -8,17 +8,18 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Icons } from "@/components/ui/icons";
-import { useRole } from "@/contexts/RoleContext";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, ArrowLeft, Mail, Loader2 } from "lucide-react";
 
 export default function Auth() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false); // show password state
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [forgotPasswordEmail, setForgotPasswordEmail] = useState("");
+  const [forgotPasswordLoading, setForgotPasswordLoading] = useState(false);
   const navigate = useNavigate();
-  const { setRole } = useRole();
+
 
   const handleEmailSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,7 +31,7 @@ export default function Auth() {
         options: {
           data: {
             username: email.split("@")[0],
-            role: "kr_member", // Set default role to kr_member
+            role: "kr_member",
           },
         },
       });
@@ -47,25 +48,47 @@ export default function Auth() {
     e.preventDefault();
     try {
       setLoading(true);
-      const { data, error } = await supabase.auth.signInWithPassword({
+      const { error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
       if (error) throw error;
 
-      // Set the user's role
-      if (data.user?.user_metadata?.role) {
-        setRole(data.user.user_metadata.role as any);
-      } else {
-        // Default to kr_member if no role is found
-        setRole("kr_member");
-      }
-
+      // Role will be fetched automatically by RoleContext's auth listener
       navigate("/");
     } catch (error: any) {
       toast.error(error.message);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!forgotPasswordEmail.trim()) {
+      toast.error("Please enter your email address");
+      return;
+    }
+
+    try {
+      setForgotPasswordLoading(true);
+      const { error } = await supabase.auth.resetPasswordForEmail(forgotPasswordEmail, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+
+      if (error) throw error;
+
+      toast.success("Password reset link sent!", {
+        description: "Check your email inbox for the reset link.",
+      });
+      setForgotPasswordEmail("");
+      setShowForgotPassword(false);
+    } catch (error: any) {
+      toast.error("Failed to send reset link", {
+        description: error.message,
+      });
+    } finally {
+      setForgotPasswordLoading(false);
     }
   };
 
@@ -87,16 +110,89 @@ export default function Auth() {
     }
   };
 
+  // Forgot Password View
+  if (showForgotPassword) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background p-4">
+        <Card className="w-full max-w-md">
+          <CardHeader className="space-y-1">
+            <div className="flex items-center gap-2">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8"
+                onClick={() => setShowForgotPassword(false)}
+              >
+                <ArrowLeft size={18} />
+              </Button>
+              <CardTitle className="text-2xl font-bold">Reset Password</CardTitle>
+            </div>
+            <CardDescription className="pl-10">
+              Enter your email address and we'll send you a link to reset your password.
+            </CardDescription>
+          </CardHeader>
+
+          <CardContent>
+            <form onSubmit={handleForgotPassword} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="forgot-email">Email Address</Label>
+                <div className="relative">
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    id="forgot-email"
+                    type="email"
+                    placeholder="johnwick@gmail.com"
+                    value={forgotPasswordEmail}
+                    onChange={(e) => setForgotPasswordEmail(e.target.value)}
+                    className="pl-10"
+                    required
+                    autoFocus
+                  />
+                </div>
+              </div>
+
+              <Button
+                type="submit"
+                className="w-full"
+                disabled={forgotPasswordLoading}
+              >
+                {forgotPasswordLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Sending...
+                  </>
+                ) : (
+                  "Send Reset Link"
+                )}
+              </Button>
+
+              <div className="text-center">
+                <button
+                  type="button"
+                  onClick={() => setShowForgotPassword(false)}
+                  className="text-sm text-muted-foreground hover:text-primary transition-colors"
+                >
+                  Back to Sign In
+                </button>
+              </div>
+            </form>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  // Main Auth View
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl font-bold">Welcome to KingsRock</CardTitle>
           <CardDescription>Sign in or create an account to continue. For member user manual
-             <span className="text-primary cursor-pointer underline"><a href="https://drive.google.com/file/d/1VtFaf_Ie9YeSC3iMoS1K-ll7XEo_EPjZ/view?usp=sharing" target="_blank"> Click Here</a></span>
-                </CardDescription>
+            <span className="text-primary cursor-pointer underline"><a href="https://drive.google.com/file/d/1VtFaf_Ie9YeSC3iMoS1K-ll7XEo_EPjZ/view?usp=sharing" target="_blank"> Click Here</a></span>
+          </CardDescription>
         </CardHeader>
-        
+
         <CardContent>
           <Tabs defaultValue="login" className="space-y-4">
             <TabsList className="grid w-full grid-cols-2">
@@ -118,7 +214,16 @@ export default function Auth() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="password">Password</Label>
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="password">Password</Label>
+                    <button
+                      type="button"
+                      onClick={() => setShowForgotPassword(true)}
+                      className="text-xs text-primary hover:text-primary/80 hover:underline transition-colors"
+                    >
+                      Forgot Password?
+                    </button>
+                  </div>
                   <div className="relative">
                     <Input
                       id="password"
@@ -141,7 +246,14 @@ export default function Auth() {
                   </div>
                 </div>
                 <Button type="submit" className="w-full" disabled={loading}>
-                  Sign In
+                  {loading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Signing in...
+                    </>
+                  ) : (
+                    "Sign In"
+                  )}
                 </Button>
               </form>
             </TabsContent>
@@ -183,7 +295,14 @@ export default function Auth() {
                   </div>
                 </div>
                 <Button type="submit" className="w-full" disabled={loading}>
-                  Sign Up
+                  {loading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Signing up...
+                    </>
+                  ) : (
+                    "Sign Up"
+                  )}
                 </Button>
               </form>
             </TabsContent>
@@ -192,7 +311,7 @@ export default function Auth() {
               <div className="absolute inset-0 flex items-center">
                 <span className="w-full border-t" />
               </div>
-            
+
               <div className="relative flex justify-center text-xs uppercase">
                 <span className="bg-background px-2 text-muted-foreground">
                   Problem signing in? <span className="text-primary cursor-pointer"><a href="mailto:teamkingsrockgg23@gmail.com" target="_blank">Contact Support</a></span>

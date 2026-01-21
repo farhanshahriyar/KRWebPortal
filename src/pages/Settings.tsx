@@ -24,8 +24,6 @@ export default function Settings() {
   const [displayName, setDisplayName] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [currentPassword, setCurrentPassword] = useState("");
-  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [reportType, setReportType] = useState("bug");
@@ -149,14 +147,14 @@ export default function Settings() {
       setLoading(true);
 
       // Validate passwords
-      if (!newPassword || !confirmPassword || !currentPassword) {
-        toast.error("All password fields are required");
+      if (!newPassword || !confirmPassword) {
+        toast.error("Please fill in both password fields");
         setLoading(false);
         return;
       }
 
       if (newPassword !== confirmPassword) {
-        toast.error("New passwords do not match");
+        toast.error("Passwords do not match");
         setLoading(false);
         return;
       }
@@ -167,27 +165,7 @@ export default function Settings() {
         return;
       }
 
-      // First verify the current password is correct by attempting a sign in
-      const { data: userData } = await supabase.auth.getUser();
-      if (!userData.user || !userData.user.email) {
-        toast.error("User email not found");
-        setLoading(false);
-        return;
-      }
-
-      // Try to sign in with current credentials
-      const { error: signInError } = await supabase.auth.signInWithPassword({
-        email: userData.user.email,
-        password: currentPassword
-      });
-
-      if (signInError) {
-        toast.error("Current password is incorrect");
-        setLoading(false);
-        return;
-      }
-
-      // Now update the password
+      // Update the password
       const { error } = await supabase.auth.updateUser({
         password: newPassword
       });
@@ -197,7 +175,6 @@ export default function Settings() {
       toast.success("Password updated successfully!");
       setNewPassword("");
       setConfirmPassword("");
-      setCurrentPassword("");
     } catch (error: any) {
       toast.error(error.message);
     } finally {
@@ -326,15 +303,6 @@ export default function Settings() {
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="space-y-2">
-              <Label htmlFor="currentPassword">Current Password</Label>
-              <div className="relative">
-                <Input id="currentPassword" type={showCurrentPassword ? "text" : "password"} value={currentPassword} onChange={e => setCurrentPassword(e.target.value)} placeholder="Enter your current password" disabled={loading} className="pr-10" />
-                <Button type="button" variant="ghost" size="icon" className="absolute right-1 top-1/2 -translate-y-1/2" onClick={() => setShowCurrentPassword(!showCurrentPassword)}>
-                  {showCurrentPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-                </Button>
-              </div>
-            </div>
-            <div className="space-y-2">
               <Label htmlFor="newPassword">New Password</Label>
               <div className="relative">
                 <Input id="newPassword" type={showNewPassword ? "text" : "password"} value={newPassword} onChange={e => setNewPassword(e.target.value)} placeholder="Enter new password" disabled={loading} className="pr-10" />
@@ -342,6 +310,7 @@ export default function Settings() {
                   {showNewPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                 </Button>
               </div>
+              <p className="text-xs text-muted-foreground">Must be at least 6 characters</p>
             </div>
             <div className="space-y-2">
               <Label htmlFor="confirmPassword">Confirm Password</Label>
@@ -352,7 +321,7 @@ export default function Settings() {
                 </Button>
               </div>
             </div>
-            <Button onClick={handlePasswordUpdate} disabled={loading || !newPassword || !confirmPassword || !currentPassword} className="bg-red-500 hover:bg-red-600 text-zinc-50">
+            <Button onClick={handlePasswordUpdate} disabled={loading || !newPassword || !confirmPassword} className="bg-red-500 hover:bg-red-600 text-zinc-50">
               {loading ? "Updating..." : "Update Password"}
             </Button>
           </CardContent>

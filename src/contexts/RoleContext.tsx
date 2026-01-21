@@ -14,7 +14,7 @@ interface RoleContextType {
 const RoleContext = createContext<RoleContextType | undefined>(undefined);
 
 const featurePermissions = {
-  kr_admin: ["*", "dashboard", "settings", "members", "manage_attendence", "manage_members", "tournaments", "schedule", "leave_request, manage_user-reports"], // All access
+  kr_admin: ["*", "dashboard", "settings", "members", "manage_attendence", "manage_members", "manage_passwords", "tournaments", "schedule", "leave_request", "manage_user-reports"], // All access
   kr_manager: [
     "dashboard",
     "announcement",
@@ -54,24 +54,62 @@ const roleDisplayNames = {
 export function RoleProvider({ children }: { children: ReactNode }) {
   const [role, setRole] = useState<Role>("kr_member");
 
-  // Initialize role from local storage or session if available
-  useEffect(() => {
-    const initializeRole = async () => {
-      // Try to get role from Supabase session
-      const { data } = await supabase.auth.getSession();
-      const { data: profile } = await supabase
+  // Function to fetch role from database
+  const fetchUserRole = async (userId: string) => {
+    console.log("[RoleContext] Fetching role for user:", userId);
+    try {
+      const { data: profile, error } = await supabase
         .from('profiles')
-        .select('*')
-        .eq('id', data.session.user.user_metadata.sub)
+        .select('role')
+        .eq('id', userId)
         .single();
-      console.log(profile)
-      if (profile?.role) {
-        setRole(profile.role as Role);
+
+      console.log("[RoleContext] Profile fetch result:", { profile, error });
+
+      if (error) {
+        console.error("[RoleContext] Error fetching profile:", error);
+        return;
       }
 
+      if (profile?.role) {
+        console.log("[RoleContext] Setting role to:", profile.role);
+        setRole(profile.role as Role);
+      }
+    } catch (error) {
+      console.error("[RoleContext] Failed to fetch user role:", error);
+    }
+  };
+
+  // Initialize role and listen for auth changes
+  useEffect(() => {
+    // Fetch role on initial load if session exists
+    const initializeRole = async () => {
+      console.log("[RoleContext] Initializing role...");
+      const { data } = await supabase.auth.getSession();
+      console.log("[RoleContext] Current session:", data.session?.user?.id);
+      if (data.session?.user?.id) {
+        await fetchUserRole(data.session.user.id);
+      }
     };
 
     initializeRole();
+
+    // Listen for auth state changes (login, logout, etc.)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        console.log("[RoleContext] Auth state changed:", event, session?.user?.id);
+
+        if (event === 'SIGNED_IN' && session?.user?.id) {
+          // User just logged in - fetch their role (non-blocking)
+          fetchUserRole(session.user.id);
+        } else if (event === 'SIGNED_OUT') {
+          // User logged out - reset to default role
+          setRole("kr_member");
+        }
+      }
+    );
+
+    return () => subscription.unsubscribe();
   }, []);
 
   const canAccess = (feature: string) => {
