@@ -73,16 +73,16 @@ const getStatusBadge = (status: AttendanceStatus) => {
   switch (status) {
     case AttendanceStatus.PRESENT:
       return <Badge className="bg-green-100 text-green-800 border-green-300 hover:bg-green-200">
-          <CheckCircle className="w-3 h-3 mr-1" /> Present
-        </Badge>;
+        <CheckCircle className="w-3 h-3 mr-1" /> Present
+      </Badge>;
     case AttendanceStatus.LATE:
       return <Badge className="bg-amber-100 text-amber-800 border-amber-300 hover:bg-amber-200">
-          <Clock className="w-3 h-3 mr-1" /> Late
-        </Badge>;
+        <Clock className="w-3 h-3 mr-1" /> Late
+      </Badge>;
     case AttendanceStatus.ABSENT:
       return <Badge className="bg-red-100 text-red-800 border-red-300 hover:bg-red-200">
-          <AlertTriangle className="w-3 h-3 mr-1" /> Absent
-        </Badge>;
+        <AlertTriangle className="w-3 h-3 mr-1" /> Absent
+      </Badge>;
     default:
       return null;
   }
@@ -117,28 +117,28 @@ const AttendanceHistory = ({
   });
   if (!historyData || historyData.length === 0) {
     return <div className="text-center py-4 text-gray-500">
-        No attendance records found for this month.
-      </div>;
+      No attendance records found for this month.
+    </div>;
   }
   return <div className="mt-6">
-      <h3 className="text-lg font-medium mb-2">Recent Attendance</h3>
-      <div className="space-y-2">
-        {historyData.map(record => <div key={record.id} className="p-3 bg-gray-50 rounded-md flex items-center justify-between">
-            <div>
-              <div className="font-medium text-gray-900">{new Date(record.date).toLocaleDateString('en-US', {
-              weekday: 'short',
-              year: 'numeric',
-              month: 'short',
-              day: 'numeric'
-            })}</div>
-              {record.notes && <div className="text-sm text-gray-500">{record.notes}</div>}
-            </div>
-            <div>
-              {getStatusBadge(record.status)}
-            </div>
-          </div>)}
-      </div>
-    </div>;
+    <h3 className="text-lg font-medium mb-2">Recent Attendance</h3>
+    <div className="space-y-2">
+      {historyData.map(record => <div key={record.id} className="p-3 bg-gray-50 rounded-md flex items-center justify-between">
+        <div>
+          <div className="font-medium text-gray-900">{new Date(record.date).toLocaleDateString('en-US', {
+            weekday: 'short',
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric'
+          })}</div>
+          {record.notes && <div className="text-sm text-gray-500">{record.notes}</div>}
+        </div>
+        <div>
+          {getStatusBadge(record.status)}
+        </div>
+      </div>)}
+    </div>
+  </div>;
 };
 
 const Attendance = () => {
@@ -233,14 +233,21 @@ const Attendance = () => {
         setHasSubmittedToday(true);
       } else if (!error && !data && isInLateWindow()) {
         // Auto mark as late if it's in the late window time frame
+        // Use setTimeout to ensure mutation is ready
         setIsAutoMarkingAttendance(true);
-        submitAttendance.mutate();
       }
     };
     if (userId) {
       checkTodayAttendance();
     }
   }, [userId]);
+
+  // Auto-submit when auto-marking is triggered
+  useEffect(() => {
+    if (isAutoMarkingAttendance && userId && !hasSubmittedToday) {
+      submitAttendance.mutate();
+    }
+  }, [isAutoMarkingAttendance, userId, hasSubmittedToday]);
   const submitAttendance = useMutation({
     mutationFn: async () => {
       if (!userId) throw new Error("User not authenticated");
@@ -344,22 +351,22 @@ const Attendance = () => {
   return (
     <div className="p-4 md:p-6 space-y-6 max-w-full overflow-x-hidden">
       <h1 className="text-2xl md:text-3xl font-bold">Attendance</h1>
-      
+
       {isPast && <Alert variant="destructive">
-          <AlertTriangle className="h-4 w-4" />
-          <AlertTitle>Notice</AlertTitle>
-          <AlertDescription>
-            You cannot mark attendance for past dates. They will be automatically marked as "Absent".
-          </AlertDescription>
-        </Alert>}
+        <AlertTriangle className="h-4 w-4" />
+        <AlertTitle>Notice</AlertTitle>
+        <AlertDescription>
+          You cannot mark attendance for past dates. They will be automatically marked as "Absent".
+        </AlertDescription>
+      </Alert>}
 
       {isLate && !isFuture && !isPast && <Alert>
-          <Clock className="h-4 w-4" />
-          <AlertTitle>Late Arrival</AlertTitle>
-          <AlertDescription>
-            {isInLateWindow() ? "It's between 11:50 AM and 11:55 AM. Your attendance will be marked as 'Late'." : "It's past 11:50 PM. Your attendance will be marked as 'Late'."}
-          </AlertDescription>
-        </Alert>}
+        <Clock className="h-4 w-4" />
+        <AlertTitle>Late Arrival</AlertTitle>
+        <AlertDescription>
+          {isInLateWindow() ? "It's between 11:50 AM and 11:55 AM. Your attendance will be marked as 'Late'." : "It's past 11:50 PM. Your attendance will be marked as 'Late'."}
+        </AlertDescription>
+      </Alert>}
 
       <div className="grid gap-6 md:grid-cols-2">
         <Card className="w-full overflow-hidden">
@@ -367,21 +374,21 @@ const Attendance = () => {
             <CardTitle>Select Date</CardTitle>
           </CardHeader>
           <CardContent className="pb-6">
-            <div className="flex justify-center">
-              <Calendar 
-                mode="single" 
-                selected={date} 
+            <div className="flex items-center justify-center w-full">
+              <Calendar
+                mode="single"
+                selected={date}
                 onSelect={newDate => {
                   if (newDate) {
                     setDate(newDate);
                     form.setValue("date", newDate);
                   }
-                }} 
-                className="rounded-md border mx-auto max-w-full" 
-                disabled={date => !canMarkAttendance(date)} 
+                }}
+                className="rounded-md border"
+                disabled={date => !canMarkAttendance(date)}
               />
             </div>
-            
+
             {userId && <AttendanceHistory userId={userId} />}
           </CardContent>
         </Card>
@@ -415,26 +422,26 @@ const Attendance = () => {
                 </div>
 
                 <FormField control={form.control} name="notes" render={({
-                field
-              }) => <FormItem>
-                      <FormLabel>Notes (Optional)</FormLabel>
-                      <FormControl>
-                        <Textarea placeholder="Add any additional notes here..." className="resize-none" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>} />
+                  field
+                }) => <FormItem>
+                    <FormLabel>Notes (Optional)</FormLabel>
+                    <FormControl>
+                      <Textarea placeholder="Add any additional notes here..." className="resize-none" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>} />
 
-                <Button type="submit" disabled={submitAttendance.isPending || isLoading || hasSubmittedToday || !canMark || isPast || isFuture || isAutoMarkingAttendance} className="w-full text-zinc-50">
+                <Button type="submit" disabled={submitAttendance.isPending || isLoading || hasSubmittedToday || !canMark || isAutoMarkingAttendance} className="w-full text-zinc-50">
                   {submitAttendance.isPending ? "Submitting..." : hasSubmittedToday ? "Attendance Already Submitted" : existingAttendance ? "Update Attendance" : "Submit Attendance"}
                 </Button>
-                
+
                 {hasSubmittedToday && <Alert className="bg-green-50 border-green-200 mt-4">
-                    <CheckCircle className="h-4 w-4 text-green-600" />
-                    <AlertDescription className="text-green-700">
-                      You have already marked your attendance for today as <strong>{getStatusLabel(displayStatus)}</strong>.
-                      {existingAttendance?.notes && existingAttendance.notes.includes("Automatically") && <span className="block mt-2 text-amber-600">This was automatically recorded by the system.</span>}
-                    </AlertDescription>
-                  </Alert>}
+                  <CheckCircle className="h-4 w-4 text-green-600" />
+                  <AlertDescription className="text-green-700">
+                    You have already marked your attendance for today as <strong>{getStatusLabel(displayStatus)}</strong>.
+                    {existingAttendance?.notes && existingAttendance.notes.includes("Automatically") && <span className="block mt-2 text-amber-600">This was automatically recorded by the system.</span>}
+                  </AlertDescription>
+                </Alert>}
               </form>
             </Form>
           </CardContent>
