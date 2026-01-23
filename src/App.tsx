@@ -9,7 +9,7 @@ import { DashboardHeader } from "@/components/DashboardHeader";
 import { ThemeProvider } from "next-themes";
 import { RoleProvider, useRole } from "@/contexts/RoleContext";
 import { toast } from "sonner";
-import Index from "./pages/Index";
+import { Dashboard } from "./components/Dashboard";
 import Auth from "./pages/Auth";
 import ResetPassword from "./pages/ResetPassword";
 import Forbidden from "./pages/Forbidden";
@@ -99,7 +99,7 @@ const App = () => {
                             <DashboardHeader />
                             <main className="flex-1 p-4">
                               <Routes>
-                                <Route path="/" element={<Index />} />
+                                <Route path="/" element={<Dashboard />} />
                                 <Route path="/attendance" element={<Attendance />} />
                                 <Route path="/noc" element={<NOC />} />
                                 <Route path="/members" element={<Members />} />

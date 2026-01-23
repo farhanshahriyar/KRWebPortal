@@ -12,6 +12,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { isAfter1150PM, isFutureDate, getBangladeshTime, canMarkAttendance, isPastDate, isInLateWindow } from "@/utils/dateUtils";
+import { format } from "date-fns";
 import { InfoIcon, CheckCircle, Clock, AlertTriangle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
@@ -167,13 +168,13 @@ const Attendance = () => {
     data: existingAttendance,
     isLoading
   } = useQuery<AttendanceRecord | null>({
-    queryKey: ['attendance', date.toISOString().split('T')[0], userId],
+    queryKey: ['attendance', format(date, 'yyyy-MM-dd'), userId],
     queryFn: async () => {
       if (!userId) return null;
       const {
         data,
         error
-      } = await supabase.from('attendance').select('*').eq('date', date.toISOString().split('T')[0]).eq('user_id', userId).maybeSingle();
+      } = await supabase.from('attendance').select('*').eq('date', format(date, 'yyyy-MM-dd')).eq('user_id', userId).maybeSingle();
       if (error) throw error;
       if (!data) return null;
 
@@ -204,7 +205,7 @@ const Attendance = () => {
       });
 
       // Check if the attendance is for today
-      const today = getBangladeshTime().toISOString().split('T')[0];
+      const today = format(getBangladeshTime(), 'yyyy-MM-dd');
       if (existingAttendance.date === today) {
         setHasSubmittedToday(true);
       } else {
@@ -224,7 +225,7 @@ const Attendance = () => {
   useEffect(() => {
     const checkTodayAttendance = async () => {
       if (!userId) return;
-      const today = getBangladeshTime().toISOString().split('T')[0];
+      const today = format(getBangladeshTime(), 'yyyy-MM-dd');
       const {
         data,
         error
@@ -262,7 +263,7 @@ const Attendance = () => {
       const notes = isAutoMarkingAttendance ? "Automatically marked as late due to check-in time" : form.getValues("notes");
       const attendanceData = {
         user_id: userId,
-        date: date.toISOString().split('T')[0],
+        date: format(date, 'yyyy-MM-dd'),
         status: statusToSubmit,
         notes: notes
       };
@@ -378,14 +379,7 @@ const Attendance = () => {
               <Calendar
                 mode="single"
                 selected={date}
-                onSelect={newDate => {
-                  if (newDate) {
-                    setDate(newDate);
-                    form.setValue("date", newDate);
-                  }
-                }}
-                className="rounded-md border"
-                disabled={date => !canMarkAttendance(date)}
+                className="rounded-md border pointer-events-none"
               />
             </div>
 

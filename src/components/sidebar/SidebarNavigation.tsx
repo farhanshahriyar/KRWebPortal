@@ -21,7 +21,7 @@ export function SidebarNavigation() {
   const location = useLocation();
   const { canAccess } = useRole();
   const { setOpenMobile, isMobile } = useSidebar();
-  
+
   const isPathActive = (path: string) => {
     if (path === "/" && location.pathname === "/") return true;
     return path !== "/" && location.pathname.startsWith(path);
@@ -40,9 +40,8 @@ export function SidebarNavigation() {
         canAccess(item.feature) && (
           <SidebarMenuItem key={item.title}>
             <SidebarMenuButton
-              className={`${
-                isPathActive(item.path) ? "bg-accent" : "hover:bg-accent"
-              } transition duration-300 ease-in-out`} // Apply bg-accent or hover effect
+              className={`${isPathActive(item.path) ? "bg-accent" : "hover:bg-accent"
+                } transition duration-300 ease-in-out`} // Apply bg-accent or hover effect
               onClick={() => handleNavigation(item.path)}
               tooltip={item.title}
             >

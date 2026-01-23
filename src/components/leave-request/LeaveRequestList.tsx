@@ -215,7 +215,7 @@
 //     return <Badge className={variants[status]}>{status}</Badge>;
 //   };
 
-  
+
 
 //   const calculateLeaveDays = (days: string[]) => `${days.length} ${days.length === 1 ? 'day' : 'days'}`;
 
@@ -479,14 +479,12 @@ const LeaveRequestList = () => {
   });
 
   const updateMutation = useMutation({
-    mutationFn: async (updatedRequest: LeaveRequest) => {
+    mutationFn: async (updatedRequest: { id: string; reason: string; message: string; requested_days: string[] }) => {
       const { error } = await supabase.from('leave_requests')
         .update({
           reason: updatedRequest.reason,
           message: updatedRequest.message,
-          requested_days: updatedRequest.requested_days.map(date =>
-            new Date(date).toISOString().split('T')[0]
-          ),
+          requested_days: updatedRequest.requested_days,
         })
         .eq('id', updatedRequest.id);
 
@@ -520,11 +518,22 @@ const LeaveRequestList = () => {
 
   const handleUpdate = () => {
     if (!selectedRequest) return;
+
+    // Enforce 7-day limit
+    if (editDays.length > 7) {
+      toast({
+        title: "Exceeds limit",
+        description: "Maximum 7 days allowed per leave request",
+        variant: "destructive",
+      });
+      return;
+    }
+
     updateMutation.mutate({
-      ...selectedRequest,
+      id: selectedRequest.id,
       reason: editReason,
       message: editMessage,
-      requested_days: editDays,
+      requested_days: editDays.map(date => date.toISOString().split('T')[0]),
     });
   };
 
@@ -637,19 +646,48 @@ const LeaveRequestList = () => {
           <DialogContent>
             <DialogHeader><DialogTitle>Edit Leave Request</DialogTitle></DialogHeader>
             <div className="space-y-6">
+              <div className="p-3 bg-blue-50 border border-blue-200 rounded-md flex items-center gap-2">
+                <svg className="h-4 w-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span className="text-sm text-blue-800">
+                  Maximum 7 days allowed per request. Selected: {editDays.length} day{editDays.length !== 1 ? 's' : ''}
+                </span>
+              </div>
               <div className="space-y-2">
                 <Label htmlFor="reason">Reason:</Label>
                 <Input id="reason" value={editReason} onChange={(e) => setEditReason(e.target.value)} required />
               </div>
               <div className="space-y-2">
                 <Label>Days for Leave:</Label>
-                <Calendar mode="multiple" selected={editDays} onSelect={setEditDays as any} className="border rounded-md" />
+                <Calendar
+                  mode="multiple"
+                  selected={editDays}
+                  onSelect={setEditDays as any}
+                  className="border rounded-md"
+                  disabled={
+                    editDays.length >= 7
+                      ? (date) => !editDays.some(selectedDate => selectedDate.toDateString() === date.toDateString())
+                      : undefined
+                  }
+                />
+                <p className="text-xs text-muted-foreground">
+                  {editDays.length > 7 && (
+                    <span className="text-red-500 font-medium">Exceeds maximum of 7 days!</span>
+                  )}
+                </p>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="message">Message:</Label>
                 <Textarea id="message" value={editMessage} onChange={(e) => setEditMessage(e.target.value)} className="min-h-[150px]" required />
               </div>
-              <Button onClick={handleUpdate} className="w-full">Update Request</Button>
+              <Button
+                onClick={handleUpdate}
+                className="w-full"
+                disabled={editDays.length === 0 || editDays.length > 7 || updateMutation.isPending}
+              >
+                {updateMutation.isPending ? "Updating..." : "Update Request"}
+              </Button>
             </div>
           </DialogContent>
         </Dialog>

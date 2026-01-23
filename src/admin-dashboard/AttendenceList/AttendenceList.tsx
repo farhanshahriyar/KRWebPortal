@@ -28,10 +28,12 @@ function AttendenceList() {
     const [selectedMonth, setSelectedMonth] = useState<string>("");
     const [searchTerm, setSearchTerm] = useState("");
     const [currentPage, setCurrentPage] = useState(1);
+    const [userMap, setUserMap] = useState<Record<string, string>>({});
     const recordsPerPage = 10;
 
     useEffect(() => {
         fetchAttendance();
+        fetchUsers();
     }, []);
 
     const fetchAttendance = async () => {
@@ -44,6 +46,22 @@ function AttendenceList() {
             console.error("Error fetching attendance:", error);
         } else {
             setAttendanceRecords(data);
+        }
+    };
+
+    const fetchUsers = async () => {
+        const { data, error } = await supabase
+            .from("profiles")
+            .select("id, username");
+
+        if (error) {
+            console.error("Error fetching users:", error);
+        } else {
+            const map: Record<string, string> = {};
+            data?.forEach((user) => {
+                map[user.id] = user.username || "N/A";
+            });
+            setUserMap(map);
         }
     };
 
@@ -118,10 +136,15 @@ function AttendenceList() {
         ? attendanceRecords.filter((r) => r.date?.startsWith(selectedMonth))
         : attendanceRecords;
 
-    const searchedRecords = filteredByMonth.filter((r) =>
-        r.user_id?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        r.date?.includes(searchTerm)
-    );
+    const searchedRecords = filteredByMonth.filter((r) => {
+        const username = userMap[r.user_id] || "";
+        const lowerSearch = searchTerm.toLowerCase();
+        return (
+            r.user_id?.toLowerCase().includes(lowerSearch) ||
+            username.toLowerCase().includes(lowerSearch) ||
+            r.date?.includes(searchTerm)
+        );
+    });
 
     const totalPages = Math.ceil(searchedRecords.length / recordsPerPage);
     const paginatedRecords = searchedRecords.slice(
@@ -130,10 +153,11 @@ function AttendenceList() {
     );
 
     const downloadCSV = () => {
-        const headers = ["ID", "User ID", "Date", "Status", "Notes", "Created At"];
+        const headers = ["ID", "User ID", "Username", "Date", "Status", "Notes", "Created At"];
         const rows = searchedRecords.map((r) => [
             r.id,
             r.user_id,
+            userMap[r.user_id] || "N/A",
             r.date,
             r.status,
             r.notes ?? "",
@@ -175,16 +199,16 @@ function AttendenceList() {
                     </Select>
 
                 </div>
-                    <Input
-                        type="text"
-                        placeholder="Search Date or UID"
-                        value={searchTerm}
-                        onChange={(e) => {
-                            setSearchTerm(e.target.value);
-                            setCurrentPage(1);
-                        }}
-                        className="border px-3 py-1 rounded-md text-sm"
-                    />
+                <Input
+                    type="text"
+                    placeholder="Search by Username or UID"
+                    value={searchTerm}
+                    onChange={(e) => {
+                        setSearchTerm(e.target.value);
+                        setCurrentPage(1);
+                    }}
+                    className="border px-3 py-1 rounded-md text-sm"
+                />
 
                 <div className="flex items-center gap-2">
                     {selectedIds.size > 0 && (
@@ -214,6 +238,7 @@ function AttendenceList() {
                             <TableHead>No.</TableHead>
                             <TableHead>Date</TableHead>
                             <TableHead>UID</TableHead>
+                            <TableHead>Username</TableHead>
                             <TableHead>Status</TableHead>
                             <TableHead>Notes</TableHead>
                             <TableHead>Present Given At</TableHead>
@@ -224,7 +249,7 @@ function AttendenceList() {
                     <TableBody>
                         {paginatedRecords.length === 0 ? (
                             <TableRow>
-                                <TableCell colSpan={8} className="text-center text-gray-500">
+                                <TableCell colSpan={9} className="text-center text-gray-500">
                                     No Attendance Records Found
                                 </TableCell>
                             </TableRow>
@@ -240,6 +265,7 @@ function AttendenceList() {
                                     <TableCell>{(currentPage - 1) * recordsPerPage + index + 1}</TableCell>
                                     <TableCell>{record.date}</TableCell>
                                     <TableCell>{record.user_id}</TableCell>
+                                    <TableCell>{userMap[record.user_id] || "N/A"}</TableCell>
                                     <TableCell>{getStatusDisplay(record.status)}</TableCell>
                                     <TableCell>{record.notes || "no notes given"}</TableCell>
                                     <TableCell>{formatDate(record.created_at)}</TableCell>
