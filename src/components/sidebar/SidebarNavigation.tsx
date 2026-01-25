@@ -1,4 +1,4 @@
-import { Home, Users, Calendar, FileText, Megaphone, Trophy, Clock, CalendarRange, History, Plus, UserCog, CalendarCheck, User } from "lucide-react"; // Other icons
+import { Home, Users, Calendar, FileText, Megaphone, Trophy, Clock, CalendarRange, History, Plus, UserCog, CalendarCheck, User, ClipboardEdit } from "lucide-react"; // Other icons
 import { useNavigate, useLocation } from "react-router-dom";
 import { SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarSubMenu, useSidebar } from "@/components/ui/sidebar";
 import { useRole } from "@/contexts/RoleContext";
@@ -9,10 +9,12 @@ const menuItems = [
   { title: "Attendance", icon: Calendar, path: "/attendance", feature: "attendance" },
   { title: "NOC List", icon: FileText, path: "/noc", feature: "noc" },
   { title: "Leave Request", icon: FileText, path: "/leave-request", feature: "leave_request" },
+  { title: "Tournament Schedule", icon: Trophy, path: "/tournaments", feature: "tournaments.view" },
   { title: "Manage Attendence List", icon: CalendarCheck, path: "/manage-attendence", feature: "manage_attendence" },
   { title: "Manage Members", icon: User, path: "/manage-members", feature: "manage_members" },
   { title: "Manage Passwords", icon: User, path: "/manage-passwords", feature: "manage_passwords" },
   { title: "Manage User Reports", icon: UserCog, path: "/manage-user-reports", feature: "manage_user-reports" },
+  { title: "Manage Update Logs", icon: ClipboardEdit, path: "/manage-logs", feature: "manage_update_logs" },
   { title: "Update Logs", icon: History, path: "/update-logs", feature: "update_logs" },
 ];
 

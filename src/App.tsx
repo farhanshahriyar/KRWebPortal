@@ -25,10 +25,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { LoadingIndicator } from "@/components/ui/loading-indicator";
 import ManageMembers from "./pages/ManageMembers";
 import { ProtectedComponent } from "./components/ProtectedComponent";
-import AddUpdateLogs from "./pages/AddUpdateLogs";
+import ManageLogs from "./pages/ManageLogs";
 import { ManageUserReports } from "@/admin-dashboard/ManageUserReports";
 import AttendenceList from "./admin-dashboard/AttendenceList/AttendenceList";
 import { ForgetPassword } from "./admin-dashboard/ForgetPassword";
+import TournamentsMatches from "./pages/TournamentsMatches";
 
 // ProtectedRoute Component - Only handles authentication
 function ProtectedRoute({ children }: { children: ReactNode }) {
@@ -107,7 +108,15 @@ const App = () => {
                                 <Route path="/settings" element={<Settings />} />
                                 <Route path="/update-logs" element={<UpdateLogs />} />
                                 <Route path="/leave-request" element={<LeaveRequest />} />
-                                <Route path="/add-update-logs" element={<AddUpdateLogs />} />
+                                <Route path="/manage-logs" element={<ManageLogs />} />
+                                <Route
+                                  path="/tournaments"
+                                  element={
+                                    <ProtectedComponent feature="tournaments.view">
+                                      <TournamentsMatches />
+                                    </ProtectedComponent>
+                                  }
+                                />
                                 <Route
                                   path="/manage-attendence"
                                   element={

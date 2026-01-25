@@ -14,7 +14,25 @@ interface RoleContextType {
 const RoleContext = createContext<RoleContextType | undefined>(undefined);
 
 const featurePermissions = {
-  kr_admin: ["*", "dashboard", "settings", "members", "manage_attendence", "manage_members", "manage_passwords", "tournaments", "schedule", "leave_request", "manage_user-reports", "admin_dashboard"], // All access
+  kr_admin: [
+    "*",
+    "dashboard",
+    "settings",
+    "members",
+    "manage_attendence",
+    "manage_members",
+    "manage_passwords",
+    "tournaments",
+    "tournaments.view",
+    "tournaments.create",
+    "tournaments.edit",
+    "tournaments.delete",
+    "tournaments.status", // Can edit participation status
+    "schedule",
+    "leave_request",
+    "manage_user-reports",
+    "admin_dashboard",
+  ],
   kr_manager: [
     "dashboard",
     "announcement",
@@ -23,6 +41,11 @@ const featurePermissions = {
     "leave_request",
     "members",
     "tournaments",
+    "tournaments.view",
+    "tournaments.create",
+    "tournaments.edit",
+    "tournaments.delete",
+    // NOTE: No "tournaments.status" - managers cannot edit status after submission
     "members.view",
     "manage_members",
     "manage_members.view",
@@ -37,11 +60,7 @@ const featurePermissions = {
     "noc",
     "leave_request",
     "update_logs",
-    // UI testing purposes it should be 
-    // "members.view",
-    // "manage_members",
-    // "manage_members.view",
-    // "members.edit",
+    "tournaments.view", // View only for members - no parent "tournaments" to prevent sub-permission access
   ],
 };
 

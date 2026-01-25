@@ -33,7 +33,9 @@ const Index = () => {
   const [timeframe, setTimeframe] = useState("30");
   const [attendanceData, setAttendanceData] = useState<AttendanceRecord[]>([]);
   const [loading, setLoading] = useState(true);
-  const [userProfile, setUserProfile] = useState<{ full_name?: string } | null>(null);
+  const [userProfile, setUserProfile] = useState<{ full_name?: string; username?: string } | null>(null);
+  const [leaveUsage, setLeaveUsage] = useState(0);
+  const [nocUsage, setNocUsage] = useState(0);
 
   // Setup real-time listeners for notifications
   useEffect(() => {
@@ -184,6 +186,12 @@ const Index = () => {
   useEffect(() => {
     const fetchAttendanceData = async () => {
       setLoading(true);
+      const { data: { user } } = await supabase.auth.getUser();
+
+      if (!user) {
+        setLoading(false);
+        return;
+      }
 
       const startDate = format(subDays(new Date(), parseInt(timeframe)), 'yyyy-MM-dd');
       const endDate = format(new Date(), 'yyyy-MM-dd');
@@ -191,6 +199,7 @@ const Index = () => {
       const { data, error } = await supabase
         .from('attendance')
         .select('*')
+        .eq('user_id', user.id)
         .gte('date', startDate)
         .lte('date', endDate);
 
@@ -215,6 +224,52 @@ const Index = () => {
 
     fetchAttendanceData();
   }, [timeframe]);
+
+  // Fetch Leave and NOC usage stats
+  useEffect(() => {
+    const fetchUsageStats = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const now = new Date();
+      const currentMonth = now.getMonth();
+      const currentYear = now.getFullYear();
+
+      // Fetch approved leaves (to count days)
+      const { data: leaves } = await supabase
+        .from('leave_requests')
+        .select('requested_days')
+        .eq('user_id', user.id)
+        .eq('status', 'approved');
+
+      let totalLeaveDays = 0;
+      if (leaves) {
+        leaves.forEach(leave => {
+          // Check each day if it belongs to current month
+          const days = leave.requested_days as string[];
+          days.forEach(day => {
+            const date = new Date(day);
+            if (date.getMonth() === currentMonth && date.getFullYear() === currentYear) {
+              totalLeaveDays++;
+            }
+          });
+        });
+      }
+      setLeaveUsage(totalLeaveDays);
+
+      // Fetch approved NOCs (to count requests) - 1 request = 1 NOC allowance
+      const { count } = await supabase
+        .from('noc_requests')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', user.id)
+        .eq('status', 'approved')
+        .gte('created_at', `${currentYear}-01-01`); // Filter for current year
+
+      setNocUsage(count || 0);
+    };
+
+    fetchUsageStats();
+  }, []);
 
   // Show welcome notification on first load
   useEffect(() => {
@@ -259,18 +314,18 @@ const Index = () => {
       // },
       {
         title: "NOC Requests",
-        value: "4",
+        value: `${Math.max(0, 4 - nocUsage)} / 4`,
         icon: FileText,
-        description: "Players will receive 4 No Objection Certificates (NOC) per year for extended leave.",
+        description: "Annual NOCs Remaining",
       },
       {
         title: "Leave Requests",
-        value: "7",
+        value: `${Math.max(0, 7 - leaveUsage)} / 7`,
         icon: FileText,
-        description: " Each player is allowed up to 7 days of leave per month.",
+        description: "Monthly Leave Days Remaining",
       },
     ];
-  }, [attendanceData, timeframe]);
+  }, [attendanceData, timeframe, leaveUsage, nocUsage]);
 
   const recentUpdates = useMemo(() => [
     {
