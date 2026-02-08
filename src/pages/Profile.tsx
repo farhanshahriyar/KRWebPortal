@@ -56,13 +56,14 @@ export default function Profile() {
           .single();
 
         if (profile) {
+          const profileData = profile as any;
           form.reset({
             username: profile.username || "",
             full_name: profile.full_name || "",
             email: user.email || "",
-            phone_number: profile.phone_number || "",
-            discord_id: profile.discord_id || "",
-            facebook_id: profile.facebook_id || "",
+            phone_number: profileData.phone_number || "",
+            discord_id: profileData.discord_id || "",
+            facebook_id: profileData.facebook_id || "",
           });
           setCreatedAt(profile.created_at);
         }

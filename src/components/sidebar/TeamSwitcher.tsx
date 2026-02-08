@@ -20,10 +20,10 @@ import { useRole } from "@/contexts/RoleContext"
 
 export function TeamSwitcher() {
     const { isMobile } = useSidebar()
-    const { role, setRole, getRoleDisplay } = useRole()
+    const { role, userRole, setRole, getRoleDisplay } = useRole()
 
-    // Only admins can switch roles
-    const isAdmin = role === "kr_admin"
+    // Only admins can switch roles - check original DB role, not active role
+    const isAdmin = userRole === "kr_admin"
 
     const roles = [
         {

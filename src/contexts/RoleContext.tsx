@@ -6,6 +6,7 @@ type Role = "kr_admin" | "kr_manager" | "kr_member";
 
 interface RoleContextType {
   role: Role;
+  userRole: Role; // Original role from database (never changes unless user logs out)
   setRole: (role: Role) => void;
   canAccess: (feature: string) => boolean;
   getRoleDisplay: () => string;
@@ -72,6 +73,7 @@ const roleDisplayNames = {
 
 export function RoleProvider({ children }: { children: ReactNode }) {
   const [role, setRole] = useState<Role>("kr_member");
+  const [userRole, setUserRole] = useState<Role>("kr_member"); // Original DB role
 
   // Function to fetch role from database
   const fetchUserRole = async (userId: string) => {
@@ -92,7 +94,9 @@ export function RoleProvider({ children }: { children: ReactNode }) {
 
       if (profile?.role) {
         console.log("[RoleContext] Setting role to:", profile.role);
-        setRole(profile.role as Role);
+        const dbRole = profile.role as Role;
+        setRole(dbRole);
+        setUserRole(dbRole); // Store original DB role
       }
     } catch (error) {
       console.error("[RoleContext] Failed to fetch user role:", error);
@@ -124,6 +128,7 @@ export function RoleProvider({ children }: { children: ReactNode }) {
         } else if (event === 'SIGNED_OUT') {
           // User logged out - reset to default role
           setRole("kr_member");
+          setUserRole("kr_member");
         }
       }
     );
@@ -156,7 +161,7 @@ export function RoleProvider({ children }: { children: ReactNode }) {
   // }, [role]);
 
   return (
-    <RoleContext.Provider value={{ role, setRole, canAccess, getRoleDisplay }}>
+    <RoleContext.Provider value={{ role, userRole, setRole, canAccess, getRoleDisplay }}>
       {children}
     </RoleContext.Provider>
   );
