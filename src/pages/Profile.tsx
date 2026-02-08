@@ -22,6 +22,9 @@ const formSchema = z.object({
   username: z.string().min(2).max(30),
   email: z.string().email(),
   full_name: z.string().min(2).max(50),
+  phone_number: z.string().min(10).max(15).optional().or(z.literal("")),
+  discord_id: z.string().min(2).max(50).optional().or(z.literal("")),
+  facebook_id: z.string().max(100).optional().or(z.literal("")),
 });
 
 export default function Profile() {
@@ -29,7 +32,7 @@ export default function Profile() {
   const { getRoleDisplay } = useRole();
   const [createdAt, setCreatedAt] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
-  
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -43,7 +46,7 @@ export default function Profile() {
     async function loadProfile() {
       try {
         const { data: { user } } = await supabase.auth.getUser();
-        
+
         if (!user) return;
 
         const { data: profile } = await supabase
@@ -57,6 +60,9 @@ export default function Profile() {
             username: profile.username || "",
             full_name: profile.full_name || "",
             email: user.email || "",
+            phone_number: profile.phone_number || "",
+            discord_id: profile.discord_id || "",
+            facebook_id: profile.facebook_id || "",
           });
           setCreatedAt(profile.created_at);
         }
@@ -79,7 +85,7 @@ export default function Profile() {
     try {
       setLoading(true);
       const { data: { user } } = await supabase.auth.getUser();
-      
+
       if (!user) {
         throw new Error('No user found');
       }
@@ -89,6 +95,9 @@ export default function Profile() {
         .update({
           username: values.username,
           full_name: values.full_name,
+          phone_number: values.phone_number || null,
+          discord_id: values.discord_id || null,
+          facebook_id: values.facebook_id || null,
           updated_at: new Date().toISOString(),
         })
         .eq('id', user.id);
@@ -159,6 +168,7 @@ export default function Profile() {
             <FormField
               control={form.control}
               name="email"
+              disabled
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Email</FormLabel>
@@ -182,6 +192,57 @@ export default function Profile() {
                 Your role in the KingsRock organization.
               </FormDescription>
             </div>
+
+            <FormField
+              control={form.control}
+              name="phone_number"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Phone Number</FormLabel>
+                  <FormControl>
+                    <Input placeholder="+880 1XXXXXXXXX" {...field} />
+                  </FormControl>
+                  <FormDescription>
+                    Your contact phone number.
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="discord_id"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Discord ID</FormLabel>
+                  <FormControl>
+                    <Input placeholder="username#1234 or username" {...field} />
+                  </FormControl>
+                  <FormDescription>
+                    Your Discord username for team communication.
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="facebook_id"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Facebook Profile ID (Optional)</FormLabel>
+                  <FormControl>
+                    <Input placeholder="facebook.com/yourprofile" {...field} />
+                  </FormControl>
+                  <FormDescription>
+                    Your Facebook profile URL or ID.
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
             <div className="space-y-2">
               <FormLabel>Member Since</FormLabel>

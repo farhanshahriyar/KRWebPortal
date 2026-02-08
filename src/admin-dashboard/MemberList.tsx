@@ -1,11 +1,13 @@
-import { useState, useEffect } from "react";
-import { supabase } from "../integrations/supabase/client"; 
-import { Tables } from "../integrations/supabase/types"; 
+import { useState, useEffect, useMemo } from "react";
+import { supabase } from "../integrations/supabase/client";
+import { Tables } from "../integrations/supabase/types";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Edit, Trash2 } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Edit, Trash2, Eye, Search } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { EditMemberDialog } from "./EditMemberDialog";
+import { ViewMemberDialog, formatRoleName } from "./ViewMemberDialog";
 import { formatDistanceToNow } from "date-fns";
 import { ProtectedComponent } from "@/components/ProtectedComponent";
 
@@ -13,6 +15,20 @@ export function MembersList() {
   const [users, setUsers] = useState<Tables<'profiles'>[]>([]);
   const [selectedUser, setSelectedUser] = useState<Tables<'profiles'> | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+
+  // Filter users based on search query
+  const filteredUsers = useMemo(() => {
+    if (!searchQuery.trim()) return users;
+    const query = searchQuery.toLowerCase();
+    return users.filter(user => {
+      const username = (user.username || "").toLowerCase();
+      const fullName = (user.full_name || "").toLowerCase();
+      const role = formatRoleName(user.role).toLowerCase();
+      return username.includes(query) || fullName.includes(query) || role.includes(query);
+    });
+  }, [users, searchQuery]);
 
   // Fetch the users (profiles) data from Supabase
   useEffect(() => {
@@ -20,7 +36,7 @@ export function MembersList() {
       const { data, error } = await supabase
         .from('profiles')
         .select('*');
-        
+
       if (error) {
         console.error("Error fetching users:", error);
       } else {
@@ -64,7 +80,7 @@ export function MembersList() {
         .from('profiles')
         .delete()
         .eq('id', userId);
-      
+
       if (error) {
         console.error("Error deleting user:", error);
       } else {
@@ -80,13 +96,18 @@ export function MembersList() {
     setIsEditDialogOpen(true);
   };
 
+  const handleView = (user: Tables<'profiles'>) => {
+    setSelectedUser(user);
+    setIsViewDialogOpen(true);
+  };
+
   const handleUpdateUser = async (updatedUser: Tables<'profiles'>) => {
     try {
       const { error } = await supabase
         .from('profiles')
         .update(updatedUser)
         .eq('id', updatedUser.id);
-        
+
       if (error) {
         console.error("Error updating user:", error);
       } else {
@@ -111,12 +132,22 @@ export function MembersList() {
 
   return (
     <div className="space-y-4">
+      {/* Search Input */}
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+        <Input
+          placeholder="Search by username, full name, or role..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="pl-10"
+        />
+      </div>
+
       <div className="rounded-md border">
         <Table>
           <TableHeader>
             <TableRow>
               <TableHead>Image</TableHead>
-              <TableHead>UID</TableHead>
               <TableHead>Username</TableHead>
               <TableHead>Full Name</TableHead>
               <TableHead>Role</TableHead>
@@ -126,7 +157,7 @@ export function MembersList() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {users.map((user) => (
+            {filteredUsers.map((user) => (
               <TableRow key={user.id}>
                 <TableCell>
                   <Avatar className="h-10 w-10">
@@ -134,14 +165,17 @@ export function MembersList() {
                     <AvatarFallback>{user.username?.substring(0, 2).toUpperCase()}</AvatarFallback>
                   </Avatar>
                 </TableCell>
-                <TableCell className="font-mono text-xs">{user.id}</TableCell>
                 <TableCell>{user.username}</TableCell>
                 <TableCell>{user.full_name}</TableCell>
-                <TableCell>{user.role}</TableCell>
+                <TableCell>{formatRoleName(user.role)}</TableCell>
                 {/* <TableCell>{user.email}</TableCell>  */}
                 <TableCell>{formatDate(user.created_at)}</TableCell>
                 <TableCell>
                   <div className="flex space-x-2">
+                    <Button variant="outline" size="sm" onClick={() => handleView(user)}>
+                      <Eye className="h-4 w-4 mr-1" />
+                      View
+                    </Button>
                     <ProtectedComponent feature="members.edit">
                       <Button variant="outline" size="sm" onClick={() => handleEdit(user)}>
                         <Edit className="h-4 w-4 mr-1" />
@@ -172,6 +206,12 @@ export function MembersList() {
         open={isEditDialogOpen}
         onOpenChange={setIsEditDialogOpen}
         onSave={handleUpdateUser}
+      />
+
+      <ViewMemberDialog
+        user={selectedUser}
+        open={isViewDialogOpen}
+        onOpenChange={setIsViewDialogOpen}
       />
     </div>
   );

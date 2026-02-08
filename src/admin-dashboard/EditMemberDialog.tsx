@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
 } from "@/components/ui/dialog";
@@ -10,19 +10,31 @@ import { Form, FormField, FormItem, FormLabel, FormControl } from "@/components/
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useRole } from "@/contexts/RoleContext";
+
+// All available roles
+const allRoles = ["kr_admin", "kr_manager", "kr_igl", "kr_member"] as const;
 
 // Match Supabase 'profiles' table exactly
 const userFormSchema = z.object({
   id: z.string(),
   username: z.string().min(3),
   full_name: z.string().min(3),
-  role: z.enum(["kr_admin", "kr_manager", "kr_member"]),
+  role: z.enum(allRoles),
   avatar_url: z.string().url().nullable().optional(),
   created_at: z.string(),
   updated_at: z.string().nullable().optional(),
 });
 
 type UserFormValues = z.infer<typeof userFormSchema>;
+
+// Role display names
+const roleDisplayNames: Record<string, string> = {
+  kr_admin: "KR Admin",
+  kr_manager: "KR Manager",
+  kr_igl: "KR IGL",
+  kr_member: "KR Member",
+};
 
 interface EditMemberDialogProps {
   user: UserFormValues | null;
@@ -32,6 +44,8 @@ interface EditMemberDialogProps {
 }
 
 export function EditMemberDialog({ user, open, onOpenChange, onSave }: EditMemberDialogProps) {
+  const { role: currentUserRole } = useRole();
+
   const form = useForm<UserFormValues>({
     resolver: zodResolver(userFormSchema),
     defaultValues: user || {
@@ -50,6 +64,19 @@ export function EditMemberDialog({ user, open, onOpenChange, onSave }: EditMembe
       form.reset(user);
     }
   }, [user, form]);
+
+  // Determine which roles the current user can assign
+  const availableRoles = useMemo(() => {
+    if (currentUserRole === "kr_admin") {
+      // Admin can assign all roles
+      return allRoles;
+    } else if (currentUserRole === "kr_manager") {
+      // Manager can only assign KR Member and KR IGL
+      return ["kr_member", "kr_igl"] as const;
+    }
+    // Default: no roles (shouldn't happen as only admin/manager can edit)
+    return [] as const;
+  }, [currentUserRole]);
 
   const onSubmit = (data: UserFormValues) => {
     onSave(data);
@@ -111,9 +138,11 @@ export function EditMemberDialog({ user, open, onOpenChange, onSave }: EditMembe
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="kr_member">KR Member</SelectItem>
-                        <SelectItem value="kr_manager">KR Manager</SelectItem>
-                        <SelectItem value="kr_admin">KR Admin</SelectItem>
+                        {availableRoles.map((roleValue) => (
+                          <SelectItem key={roleValue} value={roleValue}>
+                            {roleDisplayNames[roleValue] || roleValue}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                   </FormItem>
@@ -133,3 +162,4 @@ export function EditMemberDialog({ user, open, onOpenChange, onSave }: EditMembe
     </Dialog>
   );
 }
+

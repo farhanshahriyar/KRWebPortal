@@ -422,7 +422,7 @@ const NOCList = () => {
 
             <Button
               onClick={handleUpdate}
-              className="w-full"
+              className="w-full text-slate-50"
               disabled={updateMutation.isPending}
             >
               {updateMutation.isPending ? "Updating..." : "Update NOC"}

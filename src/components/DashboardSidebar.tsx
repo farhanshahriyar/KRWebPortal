@@ -1,23 +1,20 @@
-
 import {
   Sidebar,
   SidebarContent,
-  SidebarGroup,
-  SidebarGroupLabel,
-  SidebarGroupContent,
+  SidebarFooter,
+  SidebarHeader,
   SidebarTrigger,
   useSidebar
 } from "@/components/ui/sidebar";
-import { useRole } from "@/contexts/RoleContext";
-import { RoleFeaturesDropdown } from "./sidebar/RoleFeaturesDropdown";
-import { SidebarNavigation } from "./sidebar/SidebarNavigation";
+import { TeamSwitcher } from "./sidebar/TeamSwitcher";
+import { NavMain } from "./sidebar/NavMain";
+import { NavUser } from "./sidebar/NavUser";
 import { Button } from "./ui/button";
 import { Menu, X } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 
 export function DashboardSidebar() {
-  const { getRoleDisplay } = useRole();
   const { isMobile, setOpenMobile } = useSidebar();
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
@@ -38,9 +35,9 @@ export function DashboardSidebar() {
   return (
     <>
       {isMobile && (
-        <Button 
-          variant="ghost" 
-          size="icon" 
+        <Button
+          variant="ghost"
+          size="icon"
           className="fixed top-4 left-4 z-50 md:hidden bg-background/80 backdrop-blur-sm"
           onClick={toggleMobileMenu}
           aria-label={isOpen ? "Close menu" : "Open menu"}
@@ -53,23 +50,16 @@ export function DashboardSidebar() {
           <span className="sr-only">{isOpen ? "Close Menu" : "Toggle Menu"}</span>
         </Button>
       )}
-      <Sidebar>
+      <Sidebar collapsible="icon">
+        <SidebarHeader>
+          <TeamSwitcher />
+        </SidebarHeader>
         <SidebarContent>
-          <SidebarGroup>
-            <SidebarGroupLabel>
-              <div className="flex flex-col">
-                <span className="font-bold text-xl">KingsRock Portal</span>
-                <div className="flex items-center gap-2">
-                  <span className="text-xs font-normal opacity-70">{getRoleDisplay()}</span>
-                  <RoleFeaturesDropdown />
-                </div>
-              </div>
-            </SidebarGroupLabel>
-            <SidebarGroupContent className="mt-5">
-              <SidebarNavigation />
-            </SidebarGroupContent>
-          </SidebarGroup>
+          <NavMain />
         </SidebarContent>
+        <SidebarFooter>
+          <NavUser />
+        </SidebarFooter>
       </Sidebar>
     </>
   );

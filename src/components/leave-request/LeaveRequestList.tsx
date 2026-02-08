@@ -683,7 +683,7 @@ const LeaveRequestList = () => {
               </div>
               <Button
                 onClick={handleUpdate}
-                className="w-full"
+                className="w-full text-slate-50"
                 disabled={editDays.length === 0 || editDays.length > 7 || updateMutation.isPending}
               >
                 {updateMutation.isPending ? "Updating..." : "Update Request"}

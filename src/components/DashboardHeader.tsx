@@ -199,14 +199,16 @@ export function DashboardHeader() {
 
           <NotificationsButton />
 
-          <DropdownMenu>
+          {/* already implemented on sidebar */}
+          {/* 
+           <DropdownMenu>
             <Tooltip>
               <TooltipTrigger asChild>
                 <DropdownMenuTrigger asChild>
                   <div className="flex items-center space-x-2 cursor-pointer">
                     <span className="text-sm font-medium">{userEmail}</span>
                     <Avatar>
-                      {/* <AvatarImage src="/placeholder.svg" /> */}
+                      {/* <AvatarImage src="/placeholder.svg" /> 
                       <AvatarImage src={userAvatar || "/placeholder.svg"} />
                       <AvatarFallback>{userInitials}</AvatarFallback>
                     </Avatar>
@@ -231,6 +233,7 @@ export function DashboardHeader() {
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
+          */}
         </div>
       </div>
 
