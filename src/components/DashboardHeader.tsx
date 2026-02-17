@@ -1,10 +1,11 @@
 
 import { SidebarTrigger } from "@/components/ui/sidebar";
-import { Sun, Moon, Search } from "lucide-react";
+import { Sun, Moon, Search, HelpCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "next-themes";
 import { useNavigate } from "react-router-dom";
 import { NotificationsButton } from "@/components/ui/notifications";
+import { useRole } from "@/contexts/RoleContext";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -27,6 +28,7 @@ import { Input } from "@/components/ui/input";
 
 export function DashboardHeader() {
   const { setTheme, theme } = useTheme();
+  const { role } = useRole();
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [userEmail, setUserEmail] = useState<string>("");
@@ -177,7 +179,7 @@ export function DashboardHeader() {
           </Button>
         </div>
 
-        <div className="ml-auto flex items-center space-x-4">
+        <div className="ml-auto flex items-center space-x-2 sm:space-x-4">
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
@@ -198,6 +200,23 @@ export function DashboardHeader() {
           </Tooltip>
 
           <NotificationsButton />
+
+          {role !== "kr_admin" && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => (window as any).__openQuickTutorial?.()}
+                >
+                  <HelpCircle className="h-5 w-5" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Quick Tutorial</p>
+              </TooltipContent>
+            </Tooltip>
+          )}
 
           {/* already implemented on sidebar */}
           {/* 

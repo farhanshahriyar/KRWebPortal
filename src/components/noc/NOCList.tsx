@@ -185,7 +185,7 @@ const NOCList = () => {
 
   // Define the updateMutation for editing the NOC requests
   const updateMutation = useMutation({
-    mutationFn: async (nocData: { id: string; reason: string; message: string; requested_days: string[] }) => {
+    mutationFn: async (nocData: { id: string; reason: string; message: string; requested_days: string[]; status?: string }) => {
       const { error } = await supabase
         .from('noc_requests')
         .update({
@@ -293,67 +293,69 @@ const NOCList = () => {
           <CardTitle>Your NOC Requests</CardTitle>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>No.</TableHead>
-                {/* visible for kr-admin */}
-                {role === 'kr_admin' && (
-                  <>
-                    <TableHead>UID</TableHead>
-                  </>
-                )}
-                {/* visible for kr-admin */}
-                <TableHead>NOC Reason</TableHead>
-                <TableHead>NOC Message</TableHead>
-                <TableHead>NOC Days</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Action</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {nocs.length === 0 ? (
+          <div className="overflow-x-auto -mx-6 px-6">
+            <Table>
+              <TableHeader>
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center py-6 text-gray-500">
-                    No NOC requests found
-                  </TableCell>
+                  <TableHead>No.</TableHead>
+                  {/* visible for kr-admin */}
+                  {role === 'kr_admin' && (
+                    <>
+                      <TableHead>UID</TableHead>
+                    </>
+                  )}
+                  {/* visible for kr-admin */}
+                  <TableHead>NOC Reason</TableHead>
+                  <TableHead>NOC Message</TableHead>
+                  <TableHead>NOC Days</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Action</TableHead>
                 </TableRow>
-              ) : (
-                nocs.map((noc, index) => (
-                  <TableRow key={noc.id}>
-                    <TableCell>{index + 1}</TableCell>
-                    {/* visible for kr-admin */}
-                    {role === 'kr_admin' && (
-                      <>
-                        <TableCell>{noc.user_id}</TableCell>
-                        {/* visible for kr-admin */}
-                      </>
-                    )}
-                    <TableCell>{noc.reason}</TableCell>
-                    <TableCell>{noc.message}</TableCell>
-                    <TableCell>{calculateNOCDays(noc.requested_days)}</TableCell>
-                    <TableCell>{getStatusBadge(noc.status)}</TableCell>
-                    <TableCell>
-                      <Button
-                        variant="outline"
-                        onClick={() => handleEdit(noc)}
-                        disabled={deleteMutation.isPending || updateMutation.isPending}
-                      >
-                        <Pencil className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="outline"
-                        onClick={() => handleDelete(noc.id)}
-                        disabled={deleteMutation.isPending || updateMutation.isPending}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+              </TableHeader>
+              <TableBody>
+                {nocs.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={6} className="text-center py-6 text-gray-500">
+                      No NOC requests found
                     </TableCell>
                   </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
+                ) : (
+                  nocs.map((noc, index) => (
+                    <TableRow key={noc.id}>
+                      <TableCell>{index + 1}</TableCell>
+                      {/* visible for kr-admin */}
+                      {role === 'kr_admin' && (
+                        <>
+                          <TableCell>{noc.user_id}</TableCell>
+                          {/* visible for kr-admin */}
+                        </>
+                      )}
+                      <TableCell>{noc.reason}</TableCell>
+                      <TableCell>{noc.message}</TableCell>
+                      <TableCell>{calculateNOCDays(noc.requested_days)}</TableCell>
+                      <TableCell>{getStatusBadge(noc.status)}</TableCell>
+                      <TableCell>
+                        <Button
+                          variant="outline"
+                          onClick={() => handleEdit(noc)}
+                          disabled={deleteMutation.isPending || updateMutation.isPending}
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="outline"
+                          onClick={() => handleDelete(noc.id)}
+                          disabled={deleteMutation.isPending || updateMutation.isPending}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </div>
         </CardContent>
       </Card>
 

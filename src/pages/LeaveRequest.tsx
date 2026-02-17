@@ -36,14 +36,12 @@ const LeaveRequest = () => {
 
       console.log(`Fetching leave data from ${startMonth} to ${endMonth} for user ${user.id}`);
 
-      // Query approved leave requests for the current month
+      // Query approved leave requests for the user
       const { data, error } = await supabase
         .from('leave_requests')
         .select('requested_days')
         .eq('user_id', user.id)
-        .eq('status', 'approved')
-        .gte('requested_days[0]', startMonth)
-        .lte('requested_days[0]', endMonth);
+        .eq('status', 'approved');
 
       if (error) {
         console.error("Error fetching leave data:", error);
@@ -53,9 +51,12 @@ const LeaveRequest = () => {
 
       console.log("Approved leave data:", data);
 
-      // Calculate total used leave days this month
+      // Calculate total used leave days this month by filtering dates client-side
       const totalDays = data?.reduce((total, request) => {
-        return total + (request.requested_days?.length || 0);
+        const daysInMonth = (request.requested_days || []).filter((day: string) =>
+          day >= startMonth && day <= endMonth
+        );
+        return total + daysInMonth.length;
       }, 0) || 0;
 
       console.log(`Total used leave days: ${totalDays}`);
@@ -93,7 +94,7 @@ const LeaveRequest = () => {
   const currentMonth = format(new Date(), 'MMMM yyyy');
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="space-y-6">
       {/* <div className="grid gap-4 md:grid-cols-2 mb-6">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">

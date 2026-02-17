@@ -126,141 +126,139 @@ export default function Profile() {
   }
 
   return (
-    <div className="container mx-auto py-8">
-      <div className="max-w-2xl mx-auto">
-        <h2 className="text-3xl font-bold mb-8">Profile Settings</h2>
-        <p className="text-muted-foreground mb-8">
-          This is how others will see you on the site.
-        </p>
+    <div className="max-w-2xl mx-auto">
+      <h2 className="text-2xl md:text-3xl font-bold mb-6 md:mb-8">Profile Settings</h2>
+      <p className="text-muted-foreground mb-6 md:mb-8">
+        This is how others will see you on the site.
+      </p>
 
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-            <FormField
-              control={form.control}
-              name="full_name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Full Name</FormLabel>
-                  <FormControl>
-                    <Input {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+          <FormField
+            control={form.control}
+            name="full_name"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Full Name</FormLabel>
+                <FormControl>
+                  <Input {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-            <FormField
-              control={form.control}
-              name="username"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Username</FormLabel>
-                  <FormControl>
-                    <Input {...field} />
-                  </FormControl>
-                  <FormDescription>
-                    This is your public display name. You have to put your IGN here.
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+          <FormField
+            control={form.control}
+            name="username"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Username</FormLabel>
+                <FormControl>
+                  <Input {...field} />
+                </FormControl>
+                <FormDescription>
+                  This is your public display name. You have to put your IGN here.
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-            <FormField
-              control={form.control}
-              name="email"
-              disabled
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Email</FormLabel>
-                  <FormControl>
-                    <Input {...field} readOnly className="bg-muted" />
-                  </FormControl>
-                  <FormDescription>
-                    Your verified email address.
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+          <FormField
+            control={form.control}
+            name="email"
+            disabled
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Email</FormLabel>
+                <FormControl>
+                  <Input {...field} readOnly className="bg-muted" />
+                </FormControl>
+                <FormDescription>
+                  Your verified email address.
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-            <div className="space-y-2">
-              <FormLabel>Role</FormLabel>
-              <div className="p-3 bg-muted rounded-md">
-                {getRoleDisplay()}
-              </div>
-              <FormDescription>
-                Your role in the KingsRock organization.
-              </FormDescription>
+          <div className="space-y-2">
+            <FormLabel>Role</FormLabel>
+            <div className="p-3 bg-muted rounded-md">
+              {getRoleDisplay()}
             </div>
+            <FormDescription>
+              Your role in the KingsRock organization.
+            </FormDescription>
+          </div>
 
-            <FormField
-              control={form.control}
-              name="phone_number"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Phone Number</FormLabel>
-                  <FormControl>
-                    <Input placeholder="+880 1XXXXXXXXX" {...field} />
-                  </FormControl>
-                  <FormDescription>
-                    Your contact phone number.
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+          <FormField
+            control={form.control}
+            name="phone_number"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Phone Number</FormLabel>
+                <FormControl>
+                  <Input placeholder="+880 1XXXXXXXXX" {...field} />
+                </FormControl>
+                <FormDescription>
+                  Your contact phone number.
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-            <FormField
-              control={form.control}
-              name="discord_id"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Discord ID</FormLabel>
-                  <FormControl>
-                    <Input placeholder="username#1234 or username" {...field} />
-                  </FormControl>
-                  <FormDescription>
-                    Your Discord username for team communication.
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+          <FormField
+            control={form.control}
+            name="discord_id"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Discord ID</FormLabel>
+                <FormControl>
+                  <Input placeholder="username#1234 or username" {...field} />
+                </FormControl>
+                <FormDescription>
+                  Your Discord username for team communication.
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-            <FormField
-              control={form.control}
-              name="facebook_id"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Facebook Profile ID (Optional)</FormLabel>
-                  <FormControl>
-                    <Input placeholder="facebook.com/yourprofile" {...field} />
-                  </FormControl>
-                  <FormDescription>
-                    Your Facebook profile URL or ID.
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+          <FormField
+            control={form.control}
+            name="facebook_id"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Facebook Profile ID (Optional)</FormLabel>
+                <FormControl>
+                  <Input placeholder="facebook.com/yourprofile" {...field} />
+                </FormControl>
+                <FormDescription>
+                  Your Facebook profile URL or ID.
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-            <div className="space-y-2">
-              <FormLabel>Member Since</FormLabel>
-              <div className="p-3 bg-muted rounded-md">
-                {createdAt ? format(new Date(createdAt), 'PPP') : 'Loading...'}
-              </div>
-              <FormDescription>
-                The date you joined KingsRock.
-              </FormDescription>
+          <div className="space-y-2">
+            <FormLabel>Member Since</FormLabel>
+            <div className="p-3 bg-muted rounded-md">
+              {createdAt ? format(new Date(createdAt), 'PPP') : 'Loading...'}
             </div>
+            <FormDescription>
+              The date you joined KingsRock.
+            </FormDescription>
+          </div>
 
-            <Button type="submit" disabled={loading}>
-              Update profile
-            </Button>
-          </form>
-        </Form>
-      </div>
+          <Button type="submit" disabled={loading}>
+            Update profile
+          </Button>
+        </form>
+      </Form>
     </div>
   );
 }

@@ -9,6 +9,7 @@ import { toast } from "sonner";
 
 interface ViewMemberDialogProps {
     user: Tables<'profiles'> | null;
+    email?: string | null;
     open: boolean;
     onOpenChange: (open: boolean) => void;
 }
@@ -25,7 +26,7 @@ export function formatRoleName(role: string | null): string {
     return roleMap[role] || role;
 }
 
-export function ViewMemberDialog({ user, open, onOpenChange }: ViewMemberDialogProps) {
+export function ViewMemberDialog({ user, email, open, onOpenChange }: ViewMemberDialogProps) {
     if (!user) return null;
 
     const copyToClipboard = (text: string, label: string) => {
@@ -72,6 +73,7 @@ export function ViewMemberDialog({ user, open, onOpenChange }: ViewMemberDialogP
 
                 <div className="space-y-1">
                     <InfoRow icon={UserIcon} label="UID" value={user.id} copyable />
+                    <InfoRow icon={Mail} label="Email" value={email || null} copyable />
                     <InfoRow icon={Phone} label="Phone" value={(user as any).phone_number} copyable />
                     <InfoRow icon={MessageCircle} label="Discord" value={(user as any).discord_id} copyable />
                     <InfoRow icon={Facebook} label="Facebook" value={(user as any).facebook_id} />

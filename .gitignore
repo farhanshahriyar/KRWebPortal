@@ -14,6 +14,7 @@ dist-ssr
 .env
 .env.*.local
 .env.*
+update_logs_migration.sql
 
 # Editor directories and files
 .vscode/*
@@ -25,3 +26,11 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Supabase
+supabase/.temp
+.supabase.temp
+
+# System files
+Thumbs.db
+desktop.ini

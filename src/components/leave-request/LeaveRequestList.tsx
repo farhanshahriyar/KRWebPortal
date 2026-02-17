@@ -438,7 +438,7 @@ const LeaveRequestList = () => {
   };
 
   const { data: requests = [], isLoading, isError, error } = useQuery({
-    queryKey: ['leave-requests'],
+    queryKey: ['leave-requests', role],
     queryFn: fetchRequests,
     refetchOnWindowFocus: false,
   });
@@ -598,48 +598,50 @@ const LeaveRequestList = () => {
         {requests.length === 0 ? (
           <div className="text-center py-6 text-gray-500">No leave requests found</div>
         ) : (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>No.</TableHead>
-                {role === 'kr_admin' && <TableHead>UID</TableHead>}
-                <TableHead>Leave Reason</TableHead>
-                <TableHead>Message</TableHead>
-                <TableHead>Leave Days</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Action</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {requests.map((request, index) => (
-                <TableRow key={request.id}>
-                  <TableCell>{index + 1}</TableCell>
-                  {role === 'kr_admin' && <TableCell>{request.user_id}</TableCell>}
-                  <TableCell>{request.reason}</TableCell>
-                  <TableCell>{request.message}</TableCell>
-                  <TableCell>{calculateLeaveDays(request.requested_days)}</TableCell>
-                  <TableCell>
-                    {role === 'kr_admin' ? (
-                      <Select value={request.status} onValueChange={(value) => updateStatus(request.id, value as LeaveStatus)}>
-                        <SelectTrigger><SelectValue placeholder="Status" /></SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="pending">Pending</SelectItem>
-                          <SelectItem value="approved">Approved</SelectItem>
-                          <SelectItem value="rejected">Rejected</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    ) : (
-                      getStatusBadge(request.status)
-                    )}
-                  </TableCell>
-                  <TableCell className="space-x-2">
-                    <Button variant="outline" size="icon" onClick={() => handleEdit(request)}><Pencil className="h-4 w-4" /></Button>
-                    <Button variant="outline" size="icon" onClick={() => handleDelete(request.id)}><Trash2 className="h-4 w-4" /></Button>
-                  </TableCell>
+          <div className="overflow-x-auto -mx-6 px-6">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>No.</TableHead>
+                  {role === 'kr_admin' && <TableHead>UID</TableHead>}
+                  <TableHead>Leave Reason</TableHead>
+                  <TableHead>Message</TableHead>
+                  <TableHead>Leave Days</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Action</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {requests.map((request, index) => (
+                  <TableRow key={request.id}>
+                    <TableCell>{index + 1}</TableCell>
+                    {role === 'kr_admin' && <TableCell>{request.user_id}</TableCell>}
+                    <TableCell>{request.reason}</TableCell>
+                    <TableCell>{request.message}</TableCell>
+                    <TableCell>{calculateLeaveDays(request.requested_days)}</TableCell>
+                    <TableCell>
+                      {role === 'kr_admin' ? (
+                        <Select value={request.status} onValueChange={(value) => updateStatus(request.id, value as LeaveStatus)}>
+                          <SelectTrigger><SelectValue placeholder="Status" /></SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="pending">Pending</SelectItem>
+                            <SelectItem value="approved">Approved</SelectItem>
+                            <SelectItem value="rejected">Rejected</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      ) : (
+                        getStatusBadge(request.status)
+                      )}
+                    </TableCell>
+                    <TableCell className="space-x-2">
+                      <Button variant="outline" size="icon" onClick={() => handleEdit(request)}><Pencil className="h-4 w-4" /></Button>
+                      <Button variant="outline" size="icon" onClick={() => handleDelete(request.id)}><Trash2 className="h-4 w-4" /></Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
         )}
 
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>

@@ -9,6 +9,7 @@ import { LEAVE_STATUS_CHANGED_EVENT } from "@/components/leave-request/LeaveRequ
 import { AttendanceChart } from "@/components/dashboard/AttendanceChart";
 import { StatCards } from "@/components/dashboard/StatCards";
 import { RecentUpdates } from "@/components/dashboard/RecentUpdates";
+import { QuickTutorial } from "@/components/dashboard/QuickTutorial";
 
 // Define attendance status types
 const AttendanceStatus = {
@@ -349,6 +350,7 @@ const Index = () => {
   return (
     <div className="container mx-auto p-4 lg:p-6 max-w-7xl">
       {loading && <LoadingIndicator />}
+      <QuickTutorial />
 
       <div className="mb-8">
         {/* <h1 className="text-2xl font-bold mb-2">Hi {userProfile?.full_name?.split(' ')[0] || 'there'} ,</h1> */}

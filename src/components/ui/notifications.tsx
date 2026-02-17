@@ -26,7 +26,7 @@
 // export function NotificationsButton() {
 //   const [notifications, setNotifications] = useState<Notification[]>([]);
 //   const [loading, setLoading] = useState(true);
-  
+
 //   // Function to mark a notification as read
 //   const markAsRead = (id: number) => {
 //     setNotifications(prevNotifications => 
@@ -96,10 +96,10 @@
 //             .select('full_name')
 //             .eq('id', payload.new.user_id)
 //             .single();
-          
+
 //           const userName = userProfile?.full_name || 'A team member';
 //           const status = payload.new.status;
-          
+
 //           addNotification({
 //             title: "New Attendance",
 //             message: `${userName} has marked attendance as ${status}`,
@@ -129,10 +129,10 @@
 //               .select('full_name')
 //               .eq('id', payload.new.user_id)
 //               .single();
-            
+
 //             const userName = userProfile?.full_name || 'A team member';
 //             const status = payload.new.status;
-            
+
 //             addNotification({
 //               title: `NOC Request ${status.charAt(0).toUpperCase() + status.slice(1)}`,
 //               message: `${userName}'s NOC request has been ${status}`,
@@ -163,11 +163,11 @@
 //               .select('full_name')
 //               .eq('id', payload.new.user_id)
 //               .single();
-            
+
 //             const userName = userProfile?.full_name || 'A team member';
 //             const status = payload.new.status;
 //             const days = payload.new.requested_days.length;
-            
+
 //             addNotification({
 //               title: `Leave Request ${status.charAt(0).toUpperCase() + status.slice(1)}`,
 //               message: `${userName}'s leave request for ${days} day(s) has been ${status}`,
@@ -358,132 +358,135 @@ export function NotificationsButton() {
 
   // Setup real-time listeners for notifications
   useEffect(() => {
-    // Setup attendance notification channel
-    const attendanceChannel = supabase
-      .channel('attendance-notifications')
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'attendance',
-        },
-        async (payload) => {
-          const { data: userProfile } = await supabase
-            .from('profiles')
-            .select('full_name')
-            .eq('id', payload.new.user_id)
-            .single();
+    let attendanceChannel: ReturnType<typeof supabase.channel>;
+    let nocChannel: ReturnType<typeof supabase.channel>;
+    let leaveChannel: ReturnType<typeof supabase.channel>;
+    let updateLogsChannel: ReturnType<typeof supabase.channel>;
 
-          const userName = userProfile?.full_name || 'A team member';
-          const status = payload.new.status;
+    const setupChannels = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
 
-          addNotification({
-            title: "New Attendance",
-            message: `${userName} has marked attendance as ${status}`,
-            time: "Just now",
-            read: false,
-            type: 'attendance'
-          });
-        }
-      )
-      .subscribe();
+      const currentUserId = user.id;
 
-    // Setup NOC requests notification channel
-    const nocChannel = supabase
-      .channel('noc-notifications')
-      .on(
-        'postgres_changes',
-        {
-          event: 'UPDATE',
-          schema: 'public',
-          table: 'noc_requests',
-        },
-        async (payload) => {
-          if (payload.old.status !== payload.new.status) {
+      // Setup attendance notification channel - only for current user
+      attendanceChannel = supabase
+        .channel('attendance-notifications')
+        .on(
+          'postgres_changes',
+          {
+            event: 'INSERT',
+            schema: 'public',
+            table: 'attendance',
+            filter: `user_id=eq.${currentUserId}`,
+          },
+          async (payload) => {
             const { data: userProfile } = await supabase
               .from('profiles')
               .select('full_name')
               .eq('id', payload.new.user_id)
               .single();
 
-            const userName = userProfile?.full_name || 'A team member';
+            const userName = userProfile?.full_name || 'You';
             const status = payload.new.status;
 
             addNotification({
-              title: `NOC Request ${status.charAt(0).toUpperCase() + status.slice(1)}`,
-              message: `${userName}'s NOC request has been ${status}`,
+              title: "New Attendance",
+              message: `${userName} has marked attendance as ${status}`,
               time: "Just now",
               read: false,
-              type: 'noc'
+              type: 'attendance'
             });
           }
-        }
-      )
-      .subscribe();
+        )
+        .subscribe();
 
-    // Setup leave requests notification channel
-    const leaveChannel = supabase
-      .channel('leave-notifications')
-      .on(
-        'postgres_changes',
-        {
-          event: 'UPDATE',
-          schema: 'public',
-          table: 'leave_requests',
-        },
-        async (payload) => {
-          if (payload.old.status !== payload.new.status) {
-            const { data: userProfile } = await supabase
-              .from('profiles')
-              .select('full_name')
-              .eq('id', payload.new.user_id)
-              .single();
+      // Setup NOC requests notification channel - only for current user's requests
+      nocChannel = supabase
+        .channel('noc-notifications')
+        .on(
+          'postgres_changes',
+          {
+            event: 'UPDATE',
+            schema: 'public',
+            table: 'noc_requests',
+            filter: `user_id=eq.${currentUserId}`,
+          },
+          async (payload) => {
+            if (payload.old.status !== payload.new.status) {
+              const status = payload.new.status;
 
-            const userName = userProfile?.full_name || 'A team member';
-            const status = payload.new.status;
-            const days = payload.new.requested_days.length;
+              addNotification({
+                title: `NOC Request ${status.charAt(0).toUpperCase() + status.slice(1)}`,
+                message: `Your NOC request has been ${status}`,
+                time: "Just now",
+                read: false,
+                type: 'noc'
+              });
+            }
+          }
+        )
+        .subscribe();
 
+      // Setup leave requests notification channel - only for current user's requests
+      leaveChannel = supabase
+        .channel('leave-notifications')
+        .on(
+          'postgres_changes',
+          {
+            event: 'UPDATE',
+            schema: 'public',
+            table: 'leave_requests',
+            filter: `user_id=eq.${currentUserId}`,
+          },
+          async (payload) => {
+            if (payload.old.status !== payload.new.status) {
+              const status = payload.new.status;
+              const days = payload.new.requested_days.length;
+
+              addNotification({
+                title: `Leave Request ${status.charAt(0).toUpperCase() + status.slice(1)}`,
+                message: `Your leave request for ${days} day(s) has been ${status}`,
+                time: "Just now",
+                read: false,
+                type: 'leave'
+              });
+            }
+          }
+        )
+        .subscribe();
+
+      // Setup update logs notification channel - global (relevant to all users)
+      updateLogsChannel = supabase
+        .channel('update-logs-notifications')
+        .on(
+          'postgres_changes',
+          {
+            event: 'INSERT',
+            schema: 'public',
+            table: 'update_logs',
+          },
+          async (payload) => {
             addNotification({
-              title: `Leave Request ${status.charAt(0).toUpperCase() + status.slice(1)}`,
-              message: `${userName}'s leave request for ${days} day(s) has been ${status}`,
+              title: "New Update Log",
+              message: `A new update log has been added: ${payload.new.title || 'Update'}`,
               time: "Just now",
               read: false,
-              type: 'leave'
+              type: 'update'
             });
           }
-        }
-      )
-      .subscribe();
+        )
+        .subscribe();
+    };
 
-    // Setup update logs notification channel
-    const updateLogsChannel = supabase
-      .channel('update-logs-notifications')
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'update_logs',
-        },
-        async (payload) => {
-          addNotification({
-            title: "New Update Log",
-            message: `A new update log has been added: ${payload.new.title || 'Update'}`,
-            time: "Just now",
-            read: false,
-            type: 'update'
-          });
-        }
-      )
-      .subscribe();
+    setupChannels();
 
     // Clean up all listeners when the component unmounts
     return () => {
-      supabase.removeChannel(attendanceChannel);
-      supabase.removeChannel(nocChannel);
-      supabase.removeChannel(leaveChannel);
-      supabase.removeChannel(updateLogsChannel);
+      if (attendanceChannel) supabase.removeChannel(attendanceChannel);
+      if (nocChannel) supabase.removeChannel(nocChannel);
+      if (leaveChannel) supabase.removeChannel(leaveChannel);
+      if (updateLogsChannel) supabase.removeChannel(updateLogsChannel);
     };
   }, []); // Empty dependency array to run only once when the component mounts
 
@@ -513,8 +516,8 @@ export function NotificationsButton() {
             <Button variant="ghost" size="icon" className="relative">
               <Bell className="h-5 w-5" />
               {unreadCount > 0 && (
-                <Badge 
-                  variant="destructive" 
+                <Badge
+                  variant="destructive"
                   className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs"
                 >
                   {unreadCount}
@@ -546,9 +549,8 @@ export function NotificationsButton() {
               {notifications.map((notification) => (
                 <div
                   key={notification.id}
-                  className={`p-4 rounded-lg border ${
-                    notification.read ? "bg-background" : getNotificationClass(notification.type)
-                  }`}
+                  className={`p-4 rounded-lg border ${notification.read ? "bg-background" : getNotificationClass(notification.type)
+                    }`}
                   onClick={() => markAsRead(notification.id)}
                 >
                   <h4 className="font-semibold">{notification.title}</h4>

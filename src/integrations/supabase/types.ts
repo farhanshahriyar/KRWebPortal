@@ -7,8 +7,111 @@ export type Json =
   | Json[]
 
 export type Database = {
+  // Allows to automatically instantiate createClient with right options
+  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
+  __InternalSupabase: {
+    PostgrestVersion: "12.2.3 (519615d)"
+  }
+  graphql_public: {
+    Tables: {
+      [_ in never]: never
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      graphql: {
+        Args: {
+          extensions?: Json
+          operationName?: string
+          query?: string
+          variables?: Json
+        }
+        Returns: Json
+      }
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
+  }
   public: {
     Tables: {
+      announcements: {
+        Row: {
+          id: string
+          title: string
+          content: string
+          type: string
+          priority: string
+          created_by: string
+          is_pinned: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          title: string
+          content: string
+          type?: string
+          priority?: string
+          created_by: string
+          is_pinned?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          title?: string
+          content?: string
+          type?: string
+          priority?: string
+          created_by?: string
+          is_pinned?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "announcements_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      announcement_views: {
+        Row: {
+          id: string
+          announcement_id: string
+          user_id: string
+          viewed_at: string
+        }
+        Insert: {
+          id?: string
+          announcement_id: string
+          user_id: string
+          viewed_at?: string
+        }
+        Update: {
+          id?: string
+          announcement_id?: string
+          user_id?: string
+          viewed_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "announcement_views_announcement_id_fkey"
+            columns: ["announcement_id"]
+            isOneToOne: false
+            referencedRelation: "announcements"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       attendance: {
         Row: {
           created_at: string
@@ -109,27 +212,142 @@ export type Database = {
         Row: {
           avatar_url: string | null
           created_at: string
+          discord_id: string | null
+          facebook_id: string | null
           full_name: string | null
           id: string
+          phone_number: string | null
+          role: Database["public"]["Enums"]["app_role"] | null
           updated_at: string
           username: string | null
-          role: string | null
         }
         Insert: {
           avatar_url?: string | null
           created_at?: string
+          discord_id?: string | null
+          facebook_id?: string | null
           full_name?: string | null
           id: string
+          phone_number?: string | null
+          role?: Database["public"]["Enums"]["app_role"] | null
           updated_at?: string
           username?: string | null
         }
         Update: {
           avatar_url?: string | null
           created_at?: string
+          discord_id?: string | null
+          facebook_id?: string | null
           full_name?: string | null
           id?: string
+          phone_number?: string | null
+          role?: Database["public"]["Enums"]["app_role"] | null
           updated_at?: string
           username?: string | null
+        }
+        Relationships: []
+      }
+      tournaments: {
+        Row: {
+          activity_type: string
+          created_at: string | null
+          created_by: string | null
+          discord_server_link: string | null
+          entry_fee: string | null
+          hoster_name: string | null
+          id: string
+          location: string | null
+          match_day: string | null
+          name: string
+          notes: string | null
+          participation_status: string | null
+          price_pool: string | null
+          roster_players: string | null
+          start_date: string
+          start_time: string | null
+          tournament_link: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          activity_type: string
+          created_at?: string | null
+          created_by?: string | null
+          discord_server_link?: string | null
+          entry_fee?: string | null
+          hoster_name?: string | null
+          id?: string
+          location?: string | null
+          match_day?: string | null
+          name: string
+          notes?: string | null
+          participation_status?: string | null
+          price_pool?: string | null
+          roster_players?: string | null
+          start_date: string
+          start_time?: string | null
+          tournament_link?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          activity_type?: string
+          created_at?: string | null
+          created_by?: string | null
+          discord_server_link?: string | null
+          entry_fee?: string | null
+          hoster_name?: string | null
+          id?: string
+          location?: string | null
+          match_day?: string | null
+          name?: string
+          notes?: string | null
+          participation_status?: string | null
+          price_pool?: string | null
+          roster_players?: string | null
+          start_date?: string
+          start_time?: string | null
+          tournament_link?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tournaments_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      update_logs: {
+        Row: {
+          changes: Json
+          created_at: string
+          created_by: string | null
+          date: string
+          description: string
+          id: string
+          title: string
+          version: string
+        }
+        Insert: {
+          changes?: Json
+          created_at?: string
+          created_by?: string | null
+          date?: string
+          description: string
+          id?: string
+          title: string
+          version: string
+        }
+        Update: {
+          changes?: Json
+          created_at?: string
+          created_by?: string | null
+          date?: string
+          description?: string
+          id?: string
+          title?: string
+          version?: string
         }
         Relationships: []
       }
@@ -166,122 +384,70 @@ export type Database = {
         }
         Relationships: []
       }
-      tournaments: {
+      valorant_profiles: {
         Row: {
+          created_at: string | null
           id: string
-          name: string
-          activity_type: string
-          start_date: string
-          start_time: string | null
-          match_day: string | null
-          location: string
-          hoster_name: string | null
-          discord_server_link: string | null
-          roster_players: string | null
-          tournament_link: string | null
-          price_pool: string | null
-          entry_fee: string | null
-          participation_status: string
-          notes: string | null
-          created_by: string | null
-          created_at: string
-          updated_at: string
+          player_data: Json | null
+          riot_name: string
+          riot_tag: string
+          status: string | null
+          tracker_url: string
+          updated_at: string | null
+          user_id: string
         }
         Insert: {
+          created_at?: string | null
           id?: string
-          name: string
-          activity_type: string
-          start_date: string
-          start_time?: string | null
-          match_day?: string | null
-          location?: string
-          hoster_name?: string | null
-          discord_server_link?: string | null
-          roster_players?: string | null
-          tournament_link?: string | null
-          price_pool?: string | null
-          entry_fee?: string | null
-          participation_status?: string
-          notes?: string | null
-          created_by?: string | null
-          created_at?: string
-          updated_at?: string
+          player_data?: Json | null
+          riot_name: string
+          riot_tag: string
+          status?: string | null
+          tracker_url: string
+          updated_at?: string | null
+          user_id: string
         }
         Update: {
+          created_at?: string | null
           id?: string
-          name?: string
-          activity_type?: string
-          start_date?: string
-          start_time?: string | null
-          match_day?: string | null
-          location?: string
-          hoster_name?: string | null
-          discord_server_link?: string | null
-          roster_players?: string | null
-          tournament_link?: string | null
-          price_pool?: string | null
-          entry_fee?: string | null
-          participation_status?: string
-          notes?: string | null
-          created_by?: string | null
-          created_at?: string
-          updated_at?: string
+          player_data?: Json | null
+          riot_name?: string
+          riot_tag?: string
+          status?: string | null
+          tracker_url?: string
+          updated_at?: string | null
+          user_id?: string
         }
         Relationships: []
-      }
-      update_logs: {
-        Row: {
-          id: string
-          version: string
-          title: string
-          description: string
-          date: string
-          changes: Json
-          created_at: string
-          created_by: string | null
-        }
-        Insert: {
-          id?: string
-          version: string
-          title: string
-          description: string
-          date: string
-          changes: Json
-          created_at?: string
-          created_by?: string | null
-        }
-        Update: {
-          id?: string
-          version?: string
-          title?: string
-          description?: string
-          date?: string
-          changes?: Json
-          created_at?: string
-          created_by?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "update_logs_created_by_fkey"
-            columns: ["created_by"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          }
-        ]
       }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      mark_absent_users: {
-        Args: Record<PropertyKey, never>
+      alter_table_set_replica_identity_full: {
+        Args: { table_name: string }
         Returns: undefined
       }
+      get_announcement_view_counts: {
+        Args: Record<string, never>
+        Returns: {
+          announcement_id: string
+          view_count: number
+        }[]
+      }
+      get_user_emails: {
+        Args: never
+        Returns: {
+          email: string
+          id: string
+        }[]
+      }
+      mark_absent_users: { Args: never; Returns: undefined }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "kr_admin" | "kr_manager" | "kr_member"
+      noc_status: "pending" | "approved" | "rejected"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -289,27 +455,33 @@ export type Database = {
   }
 }
 
-type PublicSchema = Database[Extract<keyof Database, "public">]
+type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">
+
+type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
 
 export type Tables<
-  PublicTableNameOrOptions extends
-  | keyof (PublicSchema["Tables"] & PublicSchema["Views"])
-  | { schema: keyof Database },
-  TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
-  ? keyof (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
-    Database[PublicTableNameOrOptions["schema"]]["Views"])
+  DefaultSchemaTableNameOrOptions extends
+  | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
+  | { schema: keyof DatabaseWithoutInternals },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+  ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+    DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
   : never = never,
-> = PublicTableNameOrOptions extends { schema: keyof Database }
-  ? (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
-    Database[PublicTableNameOrOptions["schema"]]["Views"])[TableName] extends {
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+    DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
       Row: infer R
     }
   ? R
   : never
-  : PublicTableNameOrOptions extends keyof (PublicSchema["Tables"] &
-    PublicSchema["Views"])
-  ? (PublicSchema["Tables"] &
-    PublicSchema["Views"])[PublicTableNameOrOptions] extends {
+  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] &
+    DefaultSchema["Views"])
+  ? (DefaultSchema["Tables"] &
+    DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
       Row: infer R
     }
   ? R
@@ -317,20 +489,24 @@ export type Tables<
   : never
 
 export type TablesInsert<
-  PublicTableNameOrOptions extends
-  | keyof PublicSchema["Tables"]
-  | { schema: keyof Database },
-  TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
-  ? keyof Database[PublicTableNameOrOptions["schema"]]["Tables"]
+  DefaultSchemaTableNameOrOptions extends
+  | keyof DefaultSchema["Tables"]
+  | { schema: keyof DatabaseWithoutInternals },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+  ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
   : never = never,
-> = PublicTableNameOrOptions extends { schema: keyof Database }
-  ? Database[PublicTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
     Insert: infer I
   }
   ? I
   : never
-  : PublicTableNameOrOptions extends keyof PublicSchema["Tables"]
-  ? PublicSchema["Tables"][PublicTableNameOrOptions] extends {
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
+  ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
     Insert: infer I
   }
   ? I
@@ -338,20 +514,24 @@ export type TablesInsert<
   : never
 
 export type TablesUpdate<
-  PublicTableNameOrOptions extends
-  | keyof PublicSchema["Tables"]
-  | { schema: keyof Database },
-  TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
-  ? keyof Database[PublicTableNameOrOptions["schema"]]["Tables"]
+  DefaultSchemaTableNameOrOptions extends
+  | keyof DefaultSchema["Tables"]
+  | { schema: keyof DatabaseWithoutInternals },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+  ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
   : never = never,
-> = PublicTableNameOrOptions extends { schema: keyof Database }
-  ? Database[PublicTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
     Update: infer U
   }
   ? U
   : never
-  : PublicTableNameOrOptions extends keyof PublicSchema["Tables"]
-  ? PublicSchema["Tables"][PublicTableNameOrOptions] extends {
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
+  ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
     Update: infer U
   }
   ? U
@@ -359,29 +539,47 @@ export type TablesUpdate<
   : never
 
 export type Enums<
-  PublicEnumNameOrOptions extends
-  | keyof PublicSchema["Enums"]
-  | { schema: keyof Database },
-  EnumName extends PublicEnumNameOrOptions extends { schema: keyof Database }
-  ? keyof Database[PublicEnumNameOrOptions["schema"]]["Enums"]
+  DefaultSchemaEnumNameOrOptions extends
+  | keyof DefaultSchema["Enums"]
+  | { schema: keyof DatabaseWithoutInternals },
+  EnumName extends DefaultSchemaEnumNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+  ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
   : never = never,
-> = PublicEnumNameOrOptions extends { schema: keyof Database }
-  ? Database[PublicEnumNameOrOptions["schema"]]["Enums"][EnumName]
-  : PublicEnumNameOrOptions extends keyof PublicSchema["Enums"]
-  ? PublicSchema["Enums"][PublicEnumNameOrOptions]
+> = DefaultSchemaEnumNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
+  : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
+  ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
   : never
 
 export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
-  | keyof PublicSchema["CompositeTypes"]
-  | { schema: keyof Database },
+  | keyof DefaultSchema["CompositeTypes"]
+  | { schema: keyof DatabaseWithoutInternals },
   CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
-    schema: keyof Database
+    schema: keyof DatabaseWithoutInternals
   }
-  ? keyof Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
+  ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
   : never = never,
-> = PublicCompositeTypeNameOrOptions extends { schema: keyof Database }
-  ? Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
-  : PublicCompositeTypeNameOrOptions extends keyof PublicSchema["CompositeTypes"]
-  ? PublicSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
+> = PublicCompositeTypeNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
+  : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
+  ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
   : never
+
+export const Constants = {
+  graphql_public: {
+    Enums: {},
+  },
+  public: {
+    Enums: {
+      app_role: ["kr_admin", "kr_manager", "kr_member"],
+      noc_status: ["pending", "approved", "rejected"],
+    },
+  },
+} as const

@@ -254,10 +254,10 @@ export default function Settings() {
     return date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
   };
 
-  return <div className="container mx-auto py-6 space-y-8">
+  return <div className="max-w-4xl mx-auto space-y-6">
 
     <Tabs defaultValue="account" className="w-full">
-      <TabsList>
+      <TabsList className="w-full">
         <TabsTrigger value="account">Account Change</TabsTrigger>
         <TabsTrigger value="privacy">Privacy Center</TabsTrigger>
         <TabsTrigger value="report">Report Center</TabsTrigger>

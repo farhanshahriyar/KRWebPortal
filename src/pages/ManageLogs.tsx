@@ -114,9 +114,9 @@ const ManageLogs = () => {
 
     return (
         <div className="container mx-auto p-4 lg:p-6 max-w-4xl">
-            <div className="flex items-center justify-between mb-8">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
                 <div>
-                    <h1 className="text-3xl font-bold">Manage Update Logs</h1>
+                    <h1 className="text-2xl md:text-3xl font-bold">Manage Update Logs</h1>
                     <p className="text-muted-foreground mt-2">
                         Create, edit, and delete update logs.
                     </p>

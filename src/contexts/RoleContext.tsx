@@ -20,6 +20,8 @@ const featurePermissions = {
     "dashboard",
     "settings",
     "members",
+    "announcement",
+    "manage_announcements",
     "manage_attendence",
     "manage_members",
     "manage_passwords",
@@ -33,6 +35,7 @@ const featurePermissions = {
     "leave_request",
     "manage_user-reports",
     "admin_dashboard",
+    "manage_valorant_stats",
   ],
   kr_manager: [
     "dashboard",
@@ -51,17 +54,20 @@ const featurePermissions = {
     "manage_members",
     "manage_members.view",
     "members.edit",
+    "manage_attendence",
     "schedule",
     "update_logs",
+    "valorant_stats",
   ],
   kr_member: [
     "dashboard",
-    "announcement.view",
+    "announcement",
     "attendance",
     "noc",
     "leave_request",
     "update_logs",
     "tournaments.view", // View only for members - no parent "tournaments" to prevent sub-permission access
+    "valorant_stats",
   ],
 };
 

@@ -10,13 +10,16 @@ import { EditMemberDialog } from "./EditMemberDialog";
 import { ViewMemberDialog, formatRoleName } from "./ViewMemberDialog";
 import { formatDistanceToNow } from "date-fns";
 import { ProtectedComponent } from "@/components/ProtectedComponent";
+import { useRole } from "@/contexts/RoleContext";
 
 export function MembersList() {
   const [users, setUsers] = useState<Tables<'profiles'>[]>([]);
+  const { role } = useRole();
   const [selectedUser, setSelectedUser] = useState<Tables<'profiles'> | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [emailMap, setEmailMap] = useState<Record<string, string>>({});
 
   // Filter users based on search query
   const filteredUsers = useMemo(() => {
@@ -44,7 +47,21 @@ export function MembersList() {
       }
     };
 
+    const fetchEmails = async () => {
+      const { data, error } = await supabase.rpc('get_user_emails');
+      if (error) {
+        console.error("Error fetching emails:", error);
+      } else if (data) {
+        const map: Record<string, string> = {};
+        (data as { id: string; email: string }[]).forEach((u) => {
+          map[u.id] = u.email;
+        });
+        setEmailMap(map);
+      }
+    };
+
     fetchUsers();
+    fetchEmails();
 
     // For supabase-js v2.x, use `.channel` for real-time subscription
     const userChannel = supabase
@@ -52,11 +69,11 @@ export function MembersList() {
       .on('postgres_changes', { event: '*', schema: 'public', table: 'profiles' }, payload => {
         console.log('Received payload:', payload);
         if (payload.eventType === 'INSERT') {
-          setUsers((prevUsers) => [...prevUsers, payload.new]); // Add new user
+          setUsers((prevUsers) => [...prevUsers, payload.new as Tables<'profiles'>]); // Add new user
         } else if (payload.eventType === 'UPDATE') {
           setUsers((prevUsers) =>
             prevUsers.map((user) =>
-              user.id === payload.new.id ? payload.new : user
+              user.id === (payload.new as Tables<'profiles'>).id ? (payload.new as Tables<'profiles'>) : user
             )
           ); // Update existing user
         } else if (payload.eventType === 'DELETE') {
@@ -182,7 +199,7 @@ export function MembersList() {
                         Edit
                       </Button>
                     </ProtectedComponent>
-                    <ProtectedComponent feature="members.delete">
+                    {role === 'kr_admin' && (
                       <Button
                         variant="outline"
                         size="sm"
@@ -192,7 +209,7 @@ export function MembersList() {
                         <Trash2 className="h-4 w-4 mr-1" />
                         Delete
                       </Button>
-                    </ProtectedComponent>
+                    )}
                   </div>
                 </TableCell>
               </TableRow>
@@ -210,6 +227,7 @@ export function MembersList() {
 
       <ViewMemberDialog
         user={selectedUser}
+        email={selectedUser ? emailMap[selectedUser.id] || null : null}
         open={isViewDialogOpen}
         onOpenChange={setIsViewDialogOpen}
       />

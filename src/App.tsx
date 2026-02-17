@@ -30,6 +30,10 @@ import { ManageUserReports } from "@/admin-dashboard/ManageUserReports";
 import AttendenceList from "./admin-dashboard/AttendenceList/AttendenceList";
 import { ForgetPassword } from "./admin-dashboard/ForgetPassword";
 import TournamentsMatches from "./pages/TournamentsMatches";
+import ValorantStats from "./pages/ValorantStats";
+import { ManageValorantStats } from "./admin-dashboard/ManageValorantStats";
+import Announcement from "./pages/Announcement";
+import { ManageAnnouncements } from "./admin-dashboard/ManageAnnouncements";
 
 // ProtectedRoute Component - Only handles authentication
 function ProtectedRoute({ children }: { children: ReactNode }) {
@@ -146,6 +150,24 @@ const App = () => {
                                   element={
                                     <ProtectedComponent feature="manage_user-reports">
                                       <ManageUserReports />
+                                    </ProtectedComponent>
+                                  }
+                                />
+                                <Route path="/valorant-stats" element={<ValorantStats />} />
+                                <Route path="/announcements" element={<Announcement />} />
+                                <Route
+                                  path="/manage-announcements"
+                                  element={
+                                    <ProtectedComponent feature="manage_announcements">
+                                      <ManageAnnouncements />
+                                    </ProtectedComponent>
+                                  }
+                                />
+                                <Route
+                                  path="/manage-valorant-stats"
+                                  element={
+                                    <ProtectedComponent feature="manage_valorant_stats">
+                                      <ManageValorantStats />
                                     </ProtectedComponent>
                                   }
                                 />

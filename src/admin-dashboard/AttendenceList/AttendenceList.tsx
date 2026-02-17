@@ -21,6 +21,7 @@ import {
     SelectItem
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
+import { useRole } from "@/contexts/RoleContext";
 
 function AttendenceList() {
     const [attendanceRecords, setAttendanceRecords] = useState<Tables<'attendance'>[]>([]);
@@ -30,6 +31,8 @@ function AttendenceList() {
     const [currentPage, setCurrentPage] = useState(1);
     const [userMap, setUserMap] = useState<Record<string, string>>({});
     const recordsPerPage = 10;
+    const { role } = useRole();
+    const isAdmin = role === "kr_admin";
 
     useEffect(() => {
         fetchAttendance();
@@ -179,11 +182,14 @@ function AttendenceList() {
         URL.revokeObjectURL(url);
     };
 
+    // Calculate column count for empty-state colspan
+    const colCount = isAdmin ? 9 : 6;
+
     return (
         <div className="space-y-4">
             <PageHeader title="Manage Attendance" description="View all attendance records" />
 
-            <div className="flex justify-between items-center gap-4">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div className="flex gap-2 items-center">
                     <Select onValueChange={setSelectedMonth}>
                         <SelectTrigger className="w-[200px]">
@@ -197,11 +203,11 @@ function AttendenceList() {
                             ))}
                         </SelectContent>
                     </Select>
-
                 </div>
+
                 <Input
                     type="text"
-                    placeholder="Search by Username or UID"
+                    placeholder={isAdmin ? "Search by Username or UID" : "Search by Username"}
                     value={searchTerm}
                     onChange={(e) => {
                         setSearchTerm(e.target.value);
@@ -210,76 +216,84 @@ function AttendenceList() {
                     className="border px-3 py-1 rounded-md text-sm"
                 />
 
-                <div className="flex items-center gap-2">
-                    {selectedIds.size > 0 && (
-                        <Button variant="destructive" onClick={handleBulkDelete}>
-                            Delete Selected
-                        </Button>
-                    )}
-                    {searchedRecords.length > 0 && (
-                        <Button onClick={downloadCSV}>
-                            Download CSV
-                        </Button>
-                    )}
-                </div>
+                {isAdmin && (
+                    <div className="flex items-center gap-2">
+                        {selectedIds.size > 0 && (
+                            <Button variant="destructive" onClick={handleBulkDelete}>
+                                Delete Selected
+                            </Button>
+                        )}
+                        {searchedRecords.length > 0 && (
+                            <Button onClick={downloadCSV}>
+                                Download CSV
+                            </Button>
+                        )}
+                    </div>
+                )}
             </div>
 
-            <div className="rounded-md border">
+            <div className="rounded-md border overflow-x-auto">
                 <Table>
                     <TableHeader>
                         <TableRow>
-                            <TableHead>
-                                <Checkbox
-                                    checked={paginatedRecords.length > 0 && selectedIds.size === paginatedRecords.length}
-                                    indeterminate={selectedIds.size > 0 && selectedIds.size < paginatedRecords.length}
-                                    onCheckedChange={(checked) => handleSelectAll(checked === true)}
-                                />
-                            </TableHead>
+                            {isAdmin && (
+                                <TableHead>
+                                    <Checkbox
+                                        checked={paginatedRecords.length > 0 && selectedIds.size === paginatedRecords.length}
+                                        indeterminate={selectedIds.size > 0 && selectedIds.size < paginatedRecords.length}
+                                        onCheckedChange={(checked) => handleSelectAll(checked === true)}
+                                    />
+                                </TableHead>
+                            )}
                             <TableHead>No.</TableHead>
                             <TableHead>Date</TableHead>
-                            <TableHead>UID</TableHead>
+                            {isAdmin && <TableHead>UID</TableHead>}
                             <TableHead>Username</TableHead>
                             <TableHead>Status</TableHead>
                             <TableHead>Notes</TableHead>
                             <TableHead>Present Given At</TableHead>
-                            <TableHead>Actions</TableHead>
+                            {isAdmin && <TableHead>Actions</TableHead>}
                         </TableRow>
                     </TableHeader>
 
                     <TableBody>
                         {paginatedRecords.length === 0 ? (
                             <TableRow>
-                                <TableCell colSpan={9} className="text-center text-gray-500">
+                                <TableCell colSpan={colCount} className="text-center text-gray-500">
                                     No Attendance Records Found
                                 </TableCell>
                             </TableRow>
                         ) : (
                             paginatedRecords.map((record, index) => (
                                 <TableRow key={record.id}>
-                                    <TableCell>
-                                        <Checkbox
-                                            checked={selectedIds.has(record.id)}
-                                            onCheckedChange={() => toggleSelect(record.id)}
-                                        />
-                                    </TableCell>
+                                    {isAdmin && (
+                                        <TableCell>
+                                            <Checkbox
+                                                checked={selectedIds.has(record.id)}
+                                                onCheckedChange={() => toggleSelect(record.id)}
+                                            />
+                                        </TableCell>
+                                    )}
                                     <TableCell>{(currentPage - 1) * recordsPerPage + index + 1}</TableCell>
                                     <TableCell>{record.date}</TableCell>
-                                    <TableCell>{record.user_id}</TableCell>
+                                    {isAdmin && <TableCell>{record.user_id}</TableCell>}
                                     <TableCell>{userMap[record.user_id] || "N/A"}</TableCell>
                                     <TableCell>{getStatusDisplay(record.status)}</TableCell>
                                     <TableCell>{record.notes || "no notes given"}</TableCell>
                                     <TableCell>{formatDate(record.created_at)}</TableCell>
-                                    <TableCell>
-                                        <Button
-                                            variant="outline"
-                                            size="sm"
-                                            className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                                            onClick={() => handleDelete(record.id)}
-                                        >
-                                            <Trash2 className="h-4 w-4 mr-1" />
-                                            Delete
-                                        </Button>
-                                    </TableCell>
+                                    {isAdmin && (
+                                        <TableCell>
+                                            <Button
+                                                variant="outline"
+                                                size="sm"
+                                                className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                                                onClick={() => handleDelete(record.id)}
+                                            >
+                                                <Trash2 className="h-4 w-4 mr-1" />
+                                                Delete
+                                            </Button>
+                                        </TableCell>
+                                    )}
                                 </TableRow>
                             ))
                         )}
@@ -313,4 +327,3 @@ function AttendenceList() {
 }
 
 export default AttendenceList;
-
