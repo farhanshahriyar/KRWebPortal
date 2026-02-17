@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
     Home,
     Calendar,
@@ -9,7 +10,12 @@ import {
     ClipboardEdit,
     History,
     Crosshair,
-    Megaphone
+    Megaphone,
+    Swords,
+    Users,
+    Video,
+    BarChart3,
+    ChevronRight,
 } from "lucide-react";
 import {
     SidebarGroup,
@@ -19,6 +25,7 @@ import {
     SidebarMenuItem,
     useSidebar,
 } from "@/components/ui/sidebar"
+import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/ui/collapsible";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useRole } from "@/contexts/RoleContext";
 
@@ -31,6 +38,14 @@ const platformItems = [
     { title: "Leave Request", icon: FileText, url: "/leave-request", feature: "leave_request" },
     { title: "Valorant Stats", icon: Crosshair, url: "/valorant-stats", feature: "valorant_stats" },
     { title: "Update Logs", icon: History, url: "/update-logs", feature: "update_logs" },
+];
+
+const teamItems = [
+    { title: "Team Home", icon: Swords, url: "/team", feature: "team.view" },
+    { title: "Roster", icon: Users, url: "/team/roster", feature: "team.roster.view" },
+    { title: "Matches", icon: Trophy, url: "/team/matches", feature: "team.matches.view" },
+    { title: "VOD Review", icon: Video, url: "/team/vods", feature: "team.vods.view" },
+    { title: "Stats", icon: BarChart3, url: "/team/stats", feature: "team.stats.view" },
 ];
 
 const managementItems = [
@@ -50,6 +65,11 @@ export function NavMain() {
     const { canAccess } = useRole();
     const { setOpenMobile, isMobile } = useSidebar();
 
+    // Collapsible state — default open if user is on a team route
+    const [platformOpen, setPlatformOpen] = useState(true);
+    const [teamOpen, setTeamOpen] = useState(location.pathname.startsWith("/team"));
+    const [mgmtOpen, setMgmtOpen] = useState(true);
+
     const handleNavigation = (path: string) => {
         navigate(path);
         if (isMobile) {
@@ -59,7 +79,8 @@ export function NavMain() {
 
     const isActive = (path: string) => {
         if (path === "/" && location.pathname === "/") return true;
-        return path !== "/" && location.pathname.startsWith(path);
+        if (path === "/team" && location.pathname === "/team") return true;
+        return path !== "/" && path !== "/team" && location.pathname.startsWith(path);
     };
 
     const renderItems = (items: typeof platformItems) => {
@@ -84,21 +105,60 @@ export function NavMain() {
 
     return (
         <>
-            <SidebarGroup>
-                <SidebarGroupLabel>Platform</SidebarGroupLabel>
-                <SidebarMenu>
-                    {renderItems(platformItems)}
-                </SidebarMenu>
-            </SidebarGroup>
-
-            {/* Only show management group if user has access to at least one item */}
-            {managementItems.some(i => canAccess(i.feature)) && (
+            {/* Platform — collapsible group */}
+            <Collapsible open={platformOpen} onOpenChange={setPlatformOpen} className="group/collapsible">
                 <SidebarGroup>
-                    <SidebarGroupLabel>Management</SidebarGroupLabel>
-                    <SidebarMenu>
-                        {renderItems(managementItems)}
-                    </SidebarMenu>
+                    <CollapsibleTrigger asChild>
+                        <SidebarGroupLabel className="cursor-pointer select-none hover:bg-sidebar-accent/50 rounded-md transition-colors">
+                            Platform
+                            <ChevronRight className="ml-auto h-4 w-4 shrink-0 transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+                        </SidebarGroupLabel>
+                    </CollapsibleTrigger>
+                    <CollapsibleContent>
+                        <SidebarMenu>
+                            {renderItems(platformItems)}
+                        </SidebarMenu>
+                    </CollapsibleContent>
                 </SidebarGroup>
+            </Collapsible>
+
+            {/* Team KingsRock — collapsible group */}
+            {teamItems.some(i => canAccess(i.feature)) && (
+                <Collapsible open={teamOpen} onOpenChange={setTeamOpen} className="group/collapsible">
+                    <SidebarGroup>
+                        <CollapsibleTrigger asChild>
+                            <SidebarGroupLabel className="cursor-pointer select-none hover:bg-sidebar-accent/50 rounded-md transition-colors">
+                                <Swords className="h-4 w-4 mr-2 shrink-0" />
+                                Team KingsRock
+                                <ChevronRight className="ml-auto h-4 w-4 shrink-0 transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+                            </SidebarGroupLabel>
+                        </CollapsibleTrigger>
+                        <CollapsibleContent>
+                            <SidebarMenu>
+                                {renderItems(teamItems)}
+                            </SidebarMenu>
+                        </CollapsibleContent>
+                    </SidebarGroup>
+                </Collapsible>
+            )}
+
+            {/* Management — collapsible group */}
+            {managementItems.some(i => canAccess(i.feature)) && (
+                <Collapsible open={mgmtOpen} onOpenChange={setMgmtOpen} className="group/collapsible">
+                    <SidebarGroup>
+                        <CollapsibleTrigger asChild>
+                            <SidebarGroupLabel className="cursor-pointer select-none hover:bg-sidebar-accent/50 rounded-md transition-colors">
+                                Management
+                                <ChevronRight className="ml-auto h-4 w-4 shrink-0 transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+                            </SidebarGroupLabel>
+                        </CollapsibleTrigger>
+                        <CollapsibleContent>
+                            <SidebarMenu>
+                                {renderItems(managementItems)}
+                            </SidebarMenu>
+                        </CollapsibleContent>
+                    </SidebarGroup>
+                </Collapsible>
             )}
         </>
     );

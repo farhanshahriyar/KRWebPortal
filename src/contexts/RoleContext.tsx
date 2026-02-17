@@ -36,6 +36,18 @@ const featurePermissions = {
     "manage_user-reports",
     "admin_dashboard",
     "manage_valorant_stats",
+    // Team KingsRock
+    "team.view",
+    "team.roster.view",
+    "team.roster.manage",
+    "team.matches.view",
+    "team.matches.manage",
+    "team.matches.availability",
+    "team.vods.view",
+    "team.vods.manage",
+    "team.stats.view",
+    "team.announcements.manage",
+    "team.admin",
   ],
   kr_manager: [
     "dashboard",
@@ -58,6 +70,17 @@ const featurePermissions = {
     "schedule",
     "update_logs",
     "valorant_stats",
+    // Team KingsRock
+    "team.view",
+    "team.roster.view",
+    "team.roster.manage",
+    "team.matches.view",
+    "team.matches.manage",
+    "team.matches.availability",
+    "team.vods.view",
+    "team.vods.manage",
+    "team.stats.view",
+    "team.announcements.manage",
   ],
   kr_member: [
     "dashboard",
@@ -68,6 +91,13 @@ const featurePermissions = {
     "update_logs",
     "tournaments.view", // View only for members - no parent "tournaments" to prevent sub-permission access
     "valorant_stats",
+    // Team KingsRock
+    "team.view",
+    "team.roster.view",
+    "team.matches.view",
+    "team.matches.availability",
+    "team.vods.view",
+    "team.stats.view",
   ],
 };
 

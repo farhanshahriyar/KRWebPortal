@@ -34,6 +34,12 @@ import ValorantStats from "./pages/ValorantStats";
 import { ManageValorantStats } from "./admin-dashboard/ManageValorantStats";
 import Announcement from "./pages/Announcement";
 import { ManageAnnouncements } from "./admin-dashboard/ManageAnnouncements";
+import TeamHome from "./pages/TeamHome";
+import TeamRoster from "./pages/TeamRoster";
+import TeamMatches from "./pages/TeamMatches";
+import TeamMatchDetail from "./pages/TeamMatchDetail";
+import TeamVods from "./pages/TeamVods";
+import TeamStats from "./pages/TeamStats";
 
 // ProtectedRoute Component - Only handles authentication
 function ProtectedRoute({ children }: { children: ReactNode }) {
@@ -168,6 +174,56 @@ const App = () => {
                                   element={
                                     <ProtectedComponent feature="manage_valorant_stats">
                                       <ManageValorantStats />
+                                    </ProtectedComponent>
+                                  }
+                                />
+
+                                {/* Team KingsRock Routes */}
+                                <Route
+                                  path="/team"
+                                  element={
+                                    <ProtectedComponent feature="team.view">
+                                      <TeamHome />
+                                    </ProtectedComponent>
+                                  }
+                                />
+                                <Route
+                                  path="/team/roster"
+                                  element={
+                                    <ProtectedComponent feature="team.roster.view">
+                                      <TeamRoster />
+                                    </ProtectedComponent>
+                                  }
+                                />
+                                <Route
+                                  path="/team/matches"
+                                  element={
+                                    <ProtectedComponent feature="team.matches.view">
+                                      <TeamMatches />
+                                    </ProtectedComponent>
+                                  }
+                                />
+                                <Route
+                                  path="/team/matches/:id"
+                                  element={
+                                    <ProtectedComponent feature="team.matches.view">
+                                      <TeamMatchDetail />
+                                    </ProtectedComponent>
+                                  }
+                                />
+                                <Route
+                                  path="/team/vods"
+                                  element={
+                                    <ProtectedComponent feature="team.vods.view">
+                                      <TeamVods />
+                                    </ProtectedComponent>
+                                  }
+                                />
+                                <Route
+                                  path="/team/stats"
+                                  element={
+                                    <ProtectedComponent feature="team.stats.view">
+                                      <TeamStats />
                                     </ProtectedComponent>
                                   }
                                 />
